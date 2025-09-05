@@ -356,7 +356,7 @@
 <!-- Checkout Modal - Complete Redesign -->
 <div id="checkoutModal" class="fixed inset-0 z-50 hidden overflow-y-auto transition-all duration-300" style="background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
     <div class="min-h-screen px-2 sm:px-4 py-4 sm:py-8 flex items-center justify-center">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl mx-auto overflow-hidden transform transition-all duration-300 ease-out scale-95 opacity-0" id="checkoutModalContent">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl mx-auto overflow-hidden transform transition-all duration-300 ease-out scale-95 opacity-0 flex flex-col max-h-[90vh]" id="checkoutModalContent">
             
             <!-- Modern Header with Premium Design -->
             <div class="relative bg-gradient-to-br from-red-600 via-red-700 to-red-800 px-4 sm:px-8 py-6 sm:py-8 overflow-hidden">
@@ -369,26 +369,31 @@
                 
                 <div class="relative z-10 flex items-center justify-between">
                     <div class="flex items-center space-x-4">
-                        <div class="w-14 h-14 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white border-opacity-30">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                            </svg>
+                        <div class="w-14 h-14 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white border-opacity-50 p-2 shadow-lg">
+                            <img src="{{ asset('images/logo/logo.png') }}" 
+     alt="Kost Honest Logo" 
+     class="w-10 h-10 object-contain"
+     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+
+                            <div class="w-8 h-8 bg-red-600 rounded-lg items-center justify-center text-white font-bold text-xs hidden">
+                                KH
+                            </div>
                         </div>
                         <div>
                             <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">Checkout Booking</h2>
                             <p class="text-red-100 text-sm sm:text-base opacity-90 mt-1">Selesaikan pemesanan kamar Anda</p>
                         </div>
                     </div>
-                    <button onclick="closeCheckoutModal()" class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-white hover:bg-opacity-30 transition-all duration-300 backdrop-blur-sm border border-white border-opacity-30 group">
-                        <svg class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    <button onclick="closeCheckoutModal()" class="w-12 h-12 bg-white bg-opacity-90 rounded-xl flex items-center justify-center text-red-600 hover:bg-white hover:text-red-700 transition-all duration-300 backdrop-blur-sm border border-white border-opacity-50 group shadow-lg">
+                        <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-300 stroke-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
                 </div>
             </div>
 
             <!-- Main Content Area -->
-            <div class="grid lg:grid-cols-2 gap-0">
+            <div class="grid lg:grid-cols-2 gap-0 flex-1 overflow-y-auto">
                 
                 <!-- Left Column - Booking Summary & Room Info -->
                 <div class="p-4 sm:p-8 bg-gradient-to-br from-gray-50 to-white border-r border-gray-200">
@@ -707,6 +712,35 @@
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* Enhanced Radio Button Styles */
+.payment-method-option .w-5.h-5.border-2 {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.payment-method-option .w-5.h-5.border-2.border-red-600 {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+}
+
+.payment-method-option .bg-red-600.opacity-100.scale-100 {
+    animation: radioCheckIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes radioCheckIn {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 /* Smooth scrolling for modal content */
 #checkoutModal .overflow-y-auto {
     scroll-behavior: smooth;
@@ -903,6 +937,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const countdownInterval = setInterval(updateCountdown, 1000);
     
+    // Initialize all radio buttons as unselected
+    paymentOptions.forEach(option => {
+        const radioCircle = option.querySelector('.w-5.h-5.border-2');
+        const redDot = radioCircle ? radioCircle.querySelector('.bg-red-600') : null;
+        if (radioCircle) {
+            radioCircle.classList.add('border-gray-300');
+            radioCircle.classList.remove('border-red-600');
+        }
+        if (redDot) {
+            redDot.classList.add('opacity-0', 'scale-0');
+            redDot.classList.remove('opacity-100', 'scale-100');
+        }
+    });
+
     // Enhanced payment option selection
     paymentOptions.forEach(option => {
         const radio = option.querySelector('input[type="radio"]');
@@ -923,8 +971,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Reset radio button appearance
                 const radioCircle = opt.querySelector('.w-5.h-5.border-2');
-                const redDot = radioCircle.querySelector('.bg-red-600');
-                if (radioCircle) radioCircle.classList.add('border-gray-300');
+                const redDot = radioCircle ? radioCircle.querySelector('.bg-red-600') : null;
+                if (radioCircle) {
+                    radioCircle.classList.remove('border-red-600');
+                    radioCircle.classList.add('border-gray-300');
+                }
                 if (redDot) {
                     redDot.classList.add('opacity-0', 'scale-0');
                     redDot.classList.remove('opacity-100', 'scale-100');

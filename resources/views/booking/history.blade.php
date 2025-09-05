@@ -24,6 +24,26 @@
     <!-- Content -->
     <div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         @if($bookings->count() > 0)
+            <!-- Controls Section -->
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <!-- Page Info -->
+                <div class="text-sm text-gray-600">
+                    Menampilkan {{ $bookings->firstItem() }} - {{ $bookings->lastItem() }} dari {{ $bookings->total() }} booking
+                </div>
+                
+                <!-- Per Page Selector -->
+                <div class="flex items-center space-x-3">
+                    <label for="per_page" class="text-sm font-medium text-gray-700 whitespace-nowrap">
+                        Tampilkan per halaman:
+                    </label>
+                    <select id="per_page" name="per_page" onchange="changePerPage(this.value)"
+                            class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white min-w-[70px]">
+                        <option value="3" {{ $perPage == 3 ? 'selected' : '' }}>3</option>
+                        <option value="5" {{ $perPage == 5 ? 'selected' : '' }}>5</option>
+                        <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                    </select>
+                </div>
+            </div>
             <!-- Booking Cards -->
             <div class="space-y-6">
                 @foreach($bookings as $booking)
@@ -154,7 +174,17 @@
 
             <!-- Pagination -->
             <div class="mt-8">
-                {{ $bookings->links() }}
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <!-- Pagination Info -->
+                    <div class="text-sm text-gray-600 order-2 sm:order-1">
+                        Halaman {{ $bookings->currentPage() }} dari {{ $bookings->lastPage() }}
+                    </div>
+                    
+                    <!-- Pagination Links -->
+                    <div class="order-1 sm:order-2">
+                        {{ $bookings->links() }}
+                    </div>
+                </div>
             </div>
         @else
             <!-- Empty State -->
@@ -199,6 +229,20 @@ function cancelBooking(bookingCode) {
             alert('Terjadi kesalahan saat membatalkan booking');
         });
     }
+}
+
+function changePerPage(value) {
+    // Get current URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Update per_page parameter
+    urlParams.set('per_page', value);
+    
+    // Remove page parameter to go to first page when changing per_page
+    urlParams.delete('page');
+    
+    // Redirect to new URL
+    window.location.href = window.location.pathname + '?' + urlParams.toString();
 }
 </script>
 @endsection

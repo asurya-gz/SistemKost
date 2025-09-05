@@ -104,15 +104,23 @@ class LoginController extends Controller
 
     public function sendTemporaryPassword(Request $request)
     {
+        // Validate email format first
         $request->validate([
-            'email' => 'required|email|exists:users,email',
+            'email' => 'required|email',
         ], [
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
-            'email.exists' => 'Email tidak ditemukan dalam sistem.',
         ]);
 
+        // Check if email exists in database
         $user = User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            // If email doesn't exist, redirect to register with message
+            return redirect()->route('register')
+                ->with('error', 'Email tidak terdaftar dalam sistem. Silakan daftar terlebih dahulu.')
+                ->with('email', $request->email); // Prefill email in register form
+        }
         
         // Generate temporary password
         $temporaryPassword = Str::random(10);

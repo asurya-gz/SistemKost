@@ -87,15 +87,28 @@ class BookingController extends Controller
         return view('booking.success', compact('booking'));
     }
 
-    public function history()
+    public function history(Request $request)
     {
+        // Check and expire any expired bookings first
+        $this->checkExpiredBookings();
+        
         $user = Auth::user();
+        $perPage = $request->get('per_page', 10);
+        
+        // Validate per_page parameter
+        if (!in_array($perPage, [3, 5, 10])) {
+            $perPage = 10;
+        }
+        
         $bookings = Booking::with(['kamar.typeKamar'])
                           ->where('user_id', $user->id)
                           ->orderBy('created_at', 'desc')
-                          ->paginate(10);
+                          ->paginate($perPage);
+        
+        // Append per_page parameter to pagination links
+        $bookings->appends(['per_page' => $perPage]);
 
-        return view('booking.history', compact('bookings'));
+        return view('booking.history', compact('bookings', 'perPage'));
     }
 
     public function cancel($bookingCode)
@@ -177,8 +190,30 @@ class BookingController extends Controller
         ]);
     }
 
+    /**
+     * Check and expire bookings internally (called from other methods)
+     */
+    private function checkExpiredBookings()
+    {
+        $expiredBookings = Booking::expired()->get();
+
+        foreach ($expiredBookings as $booking) {
+            DB::beginTransaction();
+            try {
+                $booking->markAsExpired();
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollback();
+                \Log::error('Failed to expire booking: ' . $booking->id, ['error' => $e->getMessage()]);
+            }
+        }
+    }
+
     public function detail($bookingCode)
     {
+        // Check and expire any expired bookings first
+        $this->checkExpiredBookings();
+        
         $booking = Booking::with(['kamar.typeKamar.gambarTypeKamar', 'user'])
                          ->where('booking_code', $bookingCode)
                          ->where('user_id', Auth::id())

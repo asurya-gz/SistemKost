@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\GaleriController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\LegalController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -22,6 +23,10 @@ Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->na
 Route::post('/register', [RegisterController::class, 'register']);
 Route::get('/forgot-password', [LoginController::class, 'showForgotPasswordForm'])->name('password.request');
 Route::post('/forgot-password', [LoginController::class, 'sendTemporaryPassword'])->name('password.send');
+
+// Public pages
+Route::get('/syarat-ketentuan', [LegalController::class, 'terms'])->name('terms');
+Route::get('/kebijakan-privasi', [LegalController::class, 'privacy'])->name('privacy');
 // Room routes - accessible to authenticated users
 Route::middleware(['auth'])->group(function () {
     Route::get('/kamar', [RoomController::class, 'index'])->name('rooms.index');

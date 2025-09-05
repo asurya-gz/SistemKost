@@ -117,6 +117,23 @@
                 <!-- KTP File -->
                 <div>
                     <label for="ktp_file" class="block text-sm font-medium text-gray-700">Upload Foto KTP</label>
+                    @if($errors->has('ktp_file'))
+                    <div class="mt-2 mb-3 bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-yellow-700">
+                                    <strong>Perhatian:</strong> File yang sudah Anda pilih akan hilang saat ada error validasi. 
+                                    Silakan pilih ulang file KTP Anda.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
                     <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md @error('ktp_file') border-red-500 @enderror">
                         <div class="space-y-1 text-center">
                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
@@ -175,31 +192,157 @@ function confirmLogout() {
     });
 }
 
-// File upload preview
-document.getElementById('ktp_file').addEventListener('change', function(e) {
+// Global functions for file upload actions
+window.resetFileUpload = function() {
+    const fileInput = document.getElementById('ktp_file');
+    if (fileInput) {
+        fileInput.value = '';
+        fileInput.click();
+    }
+};
+
+window.cancelFileUpload = function() {
+    const fileInput = document.getElementById('ktp_file');
+    const uploadArea = document.querySelector('.border-dashed');
+    const textArea = uploadArea.querySelector('.space-y-1');
+    
+    // Clear the file input
+    fileInput.value = '';
+    
+    // Reset to default state
+    textArea.innerHTML = `
+        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <div class="flex text-sm text-gray-600">
+            <label for="ktp_file" class="relative cursor-pointer bg-white rounded-md font-medium text-red-600 hover:text-red-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-red-500">
+                <span>Upload file</span>
+                <input id="ktp_file" name="ktp_file" type="file" accept="image/*" class="sr-only">
+            </label>
+            <p class="pl-1">atau drag and drop</p>
+        </div>
+        <p class="text-xs text-gray-500">PNG, JPG, JPEG maksimal 2MB</p>
+    `;
+    
+    // Reset border styling
+    uploadArea.classList.remove('border-red-500', 'border-green-300');
+    uploadArea.classList.add('border-gray-300');
+    
+    // Re-bind event listener
+    bindFileUploadEvent();
+};
+
+// Function to bind file upload event
+function bindFileUploadEvent() {
+    const fileInput = document.getElementById('ktp_file');
+    if (fileInput) {
+        // Remove existing event listeners
+        fileInput.removeEventListener('change', handleFileUpload);
+        // Add new event listener
+        fileInput.addEventListener('change', handleFileUpload);
+    }
+}
+
+// File upload handler
+function handleFileUpload(e) {
     const file = e.target.files[0];
+    const uploadArea = e.target.closest('.border-dashed');
+    const textArea = uploadArea.querySelector('.space-y-1');
+    
     if (file) {
         const fileName = file.name;
         const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        const maxSize = 2; // 2MB
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
         
-        // Update the upload area text
-        const uploadArea = e.target.closest('.border-dashed');
-        const textArea = uploadArea.querySelector('.space-y-1');
+        // Check file size
+        if (file.size > maxSize * 1024 * 1024) {
+            textArea.innerHTML = `
+                <svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <div class="text-sm text-red-600 mb-4">
+                    <p class="font-medium">File terlalu besar!</p>
+                    <p>Maksimal 2MB. File Anda: ${fileSize} MB</p>
+                </div>
+                <div class="flex justify-center space-x-3">
+                    <button type="button" onclick="resetFileUpload()" class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-md transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Pilih File Lain
+                    </button>
+                    <button type="button" onclick="cancelFileUpload()" class="inline-flex items-center px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 text-sm font-medium rounded-md transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Batal
+                    </button>
+                </div>
+            `;
+            uploadArea.classList.add('border-red-500');
+            uploadArea.classList.remove('border-gray-300');
+            return;
+        }
+        
+        // Check file type
+        if (!allowedTypes.includes(file.type)) {
+            textArea.innerHTML = `
+                <svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <div class="text-sm text-red-600 mb-4">
+                    <p class="font-medium">Format file tidak valid!</p>
+                    <p>Hanya JPG, JPEG, atau PNG yang diizinkan</p>
+                    <p class="text-xs mt-1">File Anda: ${file.type || 'Unknown'}</p>
+                </div>
+                <div class="flex justify-center space-x-3">
+                    <button type="button" onclick="resetFileUpload()" class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-md transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Pilih File Lain
+                    </button>
+                    <button type="button" onclick="cancelFileUpload()" class="inline-flex items-center px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 text-sm font-medium rounded-md transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Batal
+                    </button>
+                </div>
+            `;
+            uploadArea.classList.add('border-red-500');
+            uploadArea.classList.remove('border-gray-300');
+            return;
+        }
+        
+        // File is valid
         textArea.innerHTML = `
             <svg class="mx-auto h-12 w-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <div class="text-sm text-gray-900">
-                <p class="font-medium">${fileName}</p>
-                <p class="text-gray-500">${fileSize} MB</p>
+            <div class="text-sm text-gray-900 mb-3">
+                <p class="font-medium text-green-600">${fileName}</p>
+                <p class="text-gray-500">${fileSize} MB - Siap diupload!</p>
             </div>
+            <button type="button" onclick="cancelFileUpload()" class="inline-flex items-center px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs rounded transition-colors">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Ganti File
+            </button>
         `;
+        uploadArea.classList.remove('border-red-500');
+        uploadArea.classList.add('border-green-300');
     }
-});
+}
 
 // NIK validation - only numbers
 document.getElementById('nik').addEventListener('input', function(e) {
     this.value = this.value.replace(/[^0-9]/g, '');
 });
+
+// Initialize file upload binding on page load
+bindFileUploadEvent();
 </script>
 @endsection

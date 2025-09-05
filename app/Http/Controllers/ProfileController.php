@@ -25,13 +25,22 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         
+        // Debug: Log all request data
+        \Log::info('Profile Complete Request', [
+            'user_id' => $user->id,
+            'has_file' => $request->hasFile('ktp_file'),
+            'files' => $request->files->all(),
+            'all_data' => $request->all()
+        ]);
+        
         // Build unique rule for NIK
         $nikRule = 'required|string|size:16|unique:user_profiles,nik';
         if ($user->profile) {
             $nikRule .= ',' . $user->profile->id;
         }
         
-        $request->validate([
+        // Custom validation with better debugging
+        $validator = Validator::make($request->all(), [
             'nik' => $nikRule,
             'address' => 'required|string',
             'gender' => 'required|in:L,P',
@@ -47,11 +56,49 @@ class ProfileController extends Controller
             'ktp_file.mimes' => 'Format file harus JPG, JPEG, atau PNG.',
             'ktp_file.max' => 'Ukuran file maksimal 2MB.',
         ]);
+        
+        // Log validation errors for debugging
+        if ($validator->fails()) {
+            \Log::error('Profile Complete Validation Failed', [
+                'errors' => $validator->errors()->toArray(),
+                'has_file' => $request->hasFile('ktp_file'),
+                'file_info' => $request->hasFile('ktp_file') ? [
+                    'size' => $request->file('ktp_file')->getSize(),
+                    'type' => $request->file('ktp_file')->getMimeType(),
+                    'name' => $request->file('ktp_file')->getClientOriginalName(),
+                ] : null
+            ]);
+            
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
         // Handle file upload
         $ktpPath = null;
-        if ($request->hasFile('ktp_file')) {
-            $ktpPath = $request->file('ktp_file')->store('ktp_files', 'public');
+        if ($request->hasFile('ktp_file') && $request->file('ktp_file')->isValid()) {
+            $file = $request->file('ktp_file');
+            $ktpPath = $file->store('ktp_files', 'public');
+            
+            // Log for debugging
+            \Log::info('KTP File uploaded successfully', [
+                'original_name' => $file->getClientOriginalName(),
+                'path' => $ktpPath,
+                'size' => $file->getSize()
+            ]);
+        } else {
+            \Log::error('KTP File upload failed', [
+                'hasFile' => $request->hasFile('ktp_file'),
+                'isValid' => $request->file('ktp_file') ? $request->file('ktp_file')->isValid() : false,
+                'error' => $request->file('ktp_file') ? $request->file('ktp_file')->getError() : 'No file'
+            ]);
+        }
+
+        // Ensure file was uploaded successfully
+        if (!$ktpPath) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['ktp_file' => 'Gagal mengupload file KTP. Silakan coba lagi.']);
         }
 
         // Create or update user profile

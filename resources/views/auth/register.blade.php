@@ -117,7 +117,7 @@
                                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                     Email Address
                                 </label>
-                                <input type="email" id="email" name="email" required value="{{ $errors->has('email') ? '' : old('email') }}"
+                                <input type="email" id="email" name="email" required value="{{ $errors->has('email') ? '' : (old('email') ?: session('email')) }}"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-300 @error('email') border-red-500 @enderror"
                                     placeholder="Masukkan email Anda">
                                 <div id="email-validation" class="mt-1 text-sm hidden">
@@ -200,8 +200,8 @@
                                 <input type="checkbox" name="terms" required
                                     class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 mt-1">
                                 <span class="ml-2 text-sm text-gray-600">
-                                    Saya setuju dengan <a href="#" class="text-red-600 hover:text-red-800 font-medium">Syarat & Ketentuan</a> 
-                                    dan <a href="#" class="text-red-600 hover:text-red-800 font-medium">Kebijakan Privasi</a>
+                                    Saya setuju dengan <a href="{{ route('terms') }}" target="_blank" class="text-red-600 hover:text-red-800 font-medium">Syarat & Ketentuan</a> 
+                                    dan <a href="{{ route('privacy') }}" target="_blank" class="text-red-600 hover:text-red-800 font-medium">Kebijakan Privasi</a>
                                 </span>
                             </div>
                             

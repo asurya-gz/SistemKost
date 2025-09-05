@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\TypeKamar;
 use App\Models\KebijakanKamar;
 use App\Models\Kamar;
+use App\Models\Booking;
+use Illuminate\Support\Facades\DB;
 
 class RoomController extends Controller
 {
@@ -100,6 +102,9 @@ class RoomController extends Controller
     
     public function detail($kamarId)
     {
+        // Check and expire any expired bookings first
+        $this->checkExpiredBookings();
+        
         $kamar = Kamar::with('typeKamar')->find($kamarId);
         
         if (!$kamar) {
@@ -238,5 +243,24 @@ class RoomController extends Controller
         $kebijakan = KebijakanKamar::all();
         
         return view('rooms.detail', compact('room', 'kebijakan'));
+    }
+
+    /**
+     * Check and expire bookings internally (called from other methods)
+     */
+    private function checkExpiredBookings()
+    {
+        $expiredBookings = Booking::expired()->get();
+
+        foreach ($expiredBookings as $booking) {
+            DB::beginTransaction();
+            try {
+                $booking->markAsExpired();
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollback();
+                \Log::error('Failed to expire booking: ' . $booking->id, ['error' => $e->getMessage()]);
+            }
+        }
     }
 }
