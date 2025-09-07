@@ -4,6 +4,21 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
+<!-- Export Buttons -->
+<div class="mb-6 flex justify-end space-x-4">
+    <a href="{{ route('admin.dashboard.export.pdf') }}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center">
+        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+        </svg>
+        Export PDF
+    </a>
+    <a href="{{ route('admin.dashboard.export.excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center">
+        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+        </svg>
+        Export Excel
+    </a>
+</div>
 <!-- Alert Notification -->
 <div id="success-notification" class="hidden fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg max-w-sm">
     <div class="flex items-center">
@@ -18,16 +33,9 @@
 <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-2xl shadow-xl p-8 mb-8 text-white">
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
         <div class="mb-6 lg:mb-0">
-            <div class="flex items-center mb-4">
-                <div class="bg-white bg-opacity-20 rounded-xl p-3 mr-4">
-                    <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H7m0 0H5m2 0v-4"/>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold mb-1">Selamat Datang, {{ auth()->user()->name }}!</h1>
-                    <p class="text-red-100 text-lg">Kelola sistem kost dengan kontrol penuh</p>
-                </div>
+            <div class="mb-4">
+                <h1 class="text-3xl font-bold mb-1">Selamat Datang, {{ auth()->user()->name }}!</h1>
+                <p class="text-red-100 text-lg">Kelola sistem kost dengan kontrol penuh</p>
             </div>
             <div class="flex flex-wrap gap-6 text-red-100">
                 <div class="flex items-center">
@@ -50,14 +58,6 @@
                 </div>
             </div>
         </div>
-        <div class="hidden lg:block">
-            <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm">
-                <div class="text-center">
-                    <div class="text-3xl font-bold mb-1">{{ date('H:i') }}</div>
-                    <div class="text-red-100 text-sm">{{ now()->locale('id')->translatedFormat('d M Y') }}</div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -68,10 +68,10 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 mb-1">Total Users</p>
-                <p class="text-3xl font-bold text-gray-900 mb-2">24</p>
+                <p class="text-3xl font-bold text-gray-900 mb-2">{{ $stats['total_users'] }}</p>
                 <div class="flex items-center text-sm">
-                    <span class="text-green-600 font-medium">+12%</span>
-                    <span class="text-gray-500 ml-1">dari bulan lalu</span>
+                    <span class="text-blue-600 font-medium">+{{ $stats['this_month_users'] }}</span>
+                    <span class="text-gray-500 ml-1">bulan ini</span>
                 </div>
             </div>
             <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl p-4">
@@ -86,11 +86,11 @@
     <div class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 border-l-4 border-green-500">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-sm font-medium text-gray-600 mb-1">Total Kost</p>
-                <p class="text-3xl font-bold text-gray-900 mb-2">6</p>
+                <p class="text-sm font-medium text-gray-600 mb-1">Total Tipe Kamar</p>
+                <p class="text-3xl font-bold text-gray-900 mb-2">{{ $stats['total_type_kamar'] }}</p>
                 <div class="flex items-center text-sm">
-                    <span class="text-green-600 font-medium">+2</span>
-                    <span class="text-gray-500 ml-1">kost baru</span>
+                    <span class="text-green-600 font-medium">{{ $stats['total_rooms'] }}</span>
+                    <span class="text-gray-500 ml-1">total kamar</span>
                 </div>
             </div>
             <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-xl p-4">
@@ -106,10 +106,10 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 mb-1">Kamar Tersedia</p>
-                <p class="text-3xl font-bold text-gray-900 mb-2">12</p>
+                <p class="text-3xl font-bold text-gray-900 mb-2">{{ $stats['available_rooms'] }}</p>
                 <div class="flex items-center text-sm">
-                    <span class="text-yellow-600 font-medium">5</span>
-                    <span class="text-gray-500 ml-1">kamar kosong</span>
+                    <span class="text-yellow-600 font-medium">{{ $stats['occupied_rooms'] }}</span>
+                    <span class="text-gray-500 ml-1">kamar dihuni</span>
                 </div>
             </div>
             <div class="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl p-4">
@@ -125,9 +125,9 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 mb-1">Tingkat Hunian</p>
-                <p class="text-3xl font-bold text-gray-900 mb-2">85%</p>
+                <p class="text-3xl font-bold text-gray-900 mb-2">{{ $stats['occupancy_rate'] }}%</p>
                 <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="bg-gradient-to-r from-red-400 to-red-600 h-2 rounded-full" style="width: 85%"></div>
+                    <div class="bg-gradient-to-r from-red-400 to-red-600 h-2 rounded-full" style="width: {{ $stats['occupancy_rate'] }}%"></div>
                 </div>
             </div>
             <div class="bg-gradient-to-br from-red-400 to-red-600 rounded-xl p-4">
@@ -149,11 +149,11 @@
                 <div class="text-sm text-gray-500">Aksi Cepat</div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button class="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <a href="{{ route('admin.users.create') }}" class="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 hover:scale-105 hover:shadow-xl block">
                     <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                     <div class="flex items-center">
-                        <div class="bg-white bg-opacity-20 rounded-lg p-3 mr-4">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <div class="bg-blue-700 rounded-lg p-3 mr-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                             </svg>
                         </div>
@@ -162,13 +162,13 @@
                             <div class="text-blue-100 text-sm">Kelola pengguna sistem</div>
                         </div>
                     </div>
-                </button>
+                </a>
                 
-                <button class="group relative overflow-hidden bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <a href="{{ route('admin.kamar.create') }}" class="group relative overflow-hidden bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 hover:scale-105 hover:shadow-xl block">
                     <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                     <div class="flex items-center">
-                        <div class="bg-white bg-opacity-20 rounded-lg p-3 mr-4">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <div class="bg-green-700 rounded-lg p-3 mr-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
                             </svg>
                         </div>
@@ -177,13 +177,13 @@
                             <div class="text-green-100 text-sm">Daftarkan kost baru</div>
                         </div>
                     </div>
-                </button>
+                </a>
                 
-                <button class="group relative overflow-hidden bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-6 rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <a href="{{ route('admin.type-kamar.create') }}" class="group relative overflow-hidden bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-6 rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 hover:scale-105 hover:shadow-xl block">
                     <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                     <div class="flex items-center">
-                        <div class="bg-white bg-opacity-20 rounded-lg p-3 mr-4">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <div class="bg-yellow-700 rounded-lg p-3 mr-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                             </svg>
                         </div>
@@ -192,13 +192,13 @@
                             <div class="text-yellow-100 text-sm">Atur tipe kamar</div>
                         </div>
                     </div>
-                </button>
+                </a>
                 
-                <button class="group relative overflow-hidden bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <a href="{{ route('admin.galeri.create') }}" class="group relative overflow-hidden bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 hover:scale-105 hover:shadow-xl block">
                     <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                     <div class="flex items-center">
-                        <div class="bg-white bg-opacity-20 rounded-lg p-3 mr-4">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <div class="bg-purple-700 rounded-lg p-3 mr-4">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
                             </svg>
                         </div>
@@ -207,7 +207,7 @@
                             <div class="text-purple-100 text-sm">Upload foto kost</div>
                         </div>
                     </div>
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -240,15 +240,15 @@
             <div class="space-y-3">
                 <div class="flex justify-between items-center">
                     <span class="text-gray-600">Hari ini</span>
-                    <span class="font-bold text-blue-600">3 Pendaftar</span>
+                    <span class="font-bold text-blue-600">{{ $stats['today_users'] }} Pendaftar</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-gray-600">Minggu ini</span>
-                    <span class="font-bold text-green-600">12 Booking</span>
+                    <span class="font-bold text-green-600">{{ $stats['this_week_bookings'] }} Booking</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-gray-600">Bulan ini</span>
-                    <span class="font-bold text-purple-600">₹ 45,680,000</span>
+                    <span class="font-bold text-purple-600">Rp {{ number_format($stats['this_month_revenue'], 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
@@ -266,57 +266,40 @@
             </button>
         </div>
         <div class="space-y-4">
-            <div class="flex items-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-l-4 border-green-500 hover:shadow-md transition-shadow duration-300">
-                <div class="bg-green-500 rounded-xl p-3 mr-4">
+            @forelse($recentActivities as $activity)
+            <div class="flex items-center p-4 bg-gradient-to-r 
+                @if($activity['color'] === 'green') from-green-50 to-emerald-50 border-l-4 border-green-500
+                @elseif($activity['color'] === 'blue') from-blue-50 to-cyan-50 border-l-4 border-blue-500
+                @elseif($activity['color'] === 'purple') from-purple-50 to-pink-50 border-l-4 border-purple-500
+                @elseif($activity['color'] === 'orange') from-orange-50 to-yellow-50 border-l-4 border-orange-500
+                @endif
+                rounded-xl hover:shadow-md transition-shadow duration-300">
+                <div class="bg-{{ $activity['color'] }}-500 rounded-xl p-3 mr-4">
+                    @if($activity['icon'] === 'user')
                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
                     </svg>
-                </div>
-                <div class="flex-1">
-                    <p class="font-semibold text-gray-900">User baru mendaftar</p>
-                    <p class="text-sm text-gray-600">John Doe bergabung dengan sistem</p>
-                    <p class="text-xs text-gray-500 mt-1">2 jam yang lalu</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border-l-4 border-blue-500 hover:shadow-md transition-shadow duration-300">
-                <div class="bg-blue-500 rounded-xl p-3 mr-4">
+                    @elseif($activity['icon'] === 'home')
                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
                     </svg>
-                </div>
-                <div class="flex-1">
-                    <p class="font-semibold text-gray-900">Kamar 201 telah dipesan</p>
-                    <p class="text-sm text-gray-600">Jane Smith melakukan booking</p>
-                    <p class="text-xs text-gray-500 mt-1">4 jam yang lalu</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-l-4 border-purple-500 hover:shadow-md transition-shadow duration-300">
-                <div class="bg-purple-500 rounded-xl p-3 mr-4">
+                    @elseif($activity['icon'] === 'clipboard')
                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
                     </svg>
+                    @endif
                 </div>
                 <div class="flex-1">
-                    <p class="font-semibold text-gray-900">Tipe kamar baru ditambahkan</p>
-                    <p class="text-sm text-gray-600">Tipe "Deluxe" telah dibuat</p>
-                    <p class="text-xs text-gray-500 mt-1">6 jam yang lalu</p>
+                    <p class="font-semibold text-gray-900">{{ $activity['title'] }}</p>
+                    <p class="text-sm text-gray-600">{{ $activity['description'] }}</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ $activity['time'] }}</p>
                 </div>
             </div>
-            
-            <div class="flex items-center p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl border-l-4 border-orange-500 hover:shadow-md transition-shadow duration-300">
-                <div class="bg-orange-500 rounded-xl p-3 mr-4">
-                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <p class="font-semibold text-gray-900">Review baru diterima</p>
-                    <p class="text-sm text-gray-600">Rating 5 bintang untuk Kost Mawar</p>
-                    <p class="text-xs text-gray-500 mt-1">1 hari yang lalu</p>
-                </div>
+            @empty
+            <div class="text-center py-8">
+                <p class="text-gray-500">Belum ada aktivitas terbaru</p>
             </div>
+            @endforelse
         </div>
     </div>
     
@@ -331,16 +314,23 @@
             </select>
         </div>
         
-        <!-- Simple Chart Representation -->
-        <div class="h-64 bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-6 flex flex-col justify-center items-center">
-            <svg class="w-16 h-16 text-red-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            <h3 class="text-lg font-bold text-gray-700 mb-2">Grafik Analitik</h3>
-            <p class="text-gray-500 text-center text-sm">Visualisasi data statistik akan ditampilkan di sini. Termasuk trend booking, pendapatan, dan tingkat hunian.</p>
-            <button class="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300">
-                View Details
-            </button>
+        <!-- Monthly Data Chart -->
+        <div class="h-64 bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-6">
+            <h4 class="text-lg font-bold text-gray-700 mb-4">Booking & Revenue Trend</h4>
+            <div class="space-y-2 max-h-48 overflow-y-auto">
+                @foreach($monthlyData->take(6) as $data)
+                <div class="flex justify-between items-center py-2 px-3 bg-white bg-opacity-50 rounded-lg">
+                    <span class="text-sm font-medium text-gray-700">{{ $data['month'] }}</span>
+                    <div class="flex space-x-4 text-xs">
+                        <span class="text-blue-600 font-medium">{{ $data['bookings'] }} booking</span>
+                        <span class="text-green-600 font-medium">Rp {{ number_format($data['revenue'], 0, ',', '.') }}</span>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            <div class="mt-4 text-center">
+                <p class="text-sm text-gray-600 mb-2">Total Bookings: <strong>{{ $stats['total_bookings'] }}</strong> | Total Revenue: <strong>Rp {{ number_format($stats['total_revenue'], 0, ',', '.') }}</strong></p>
+            </div>
         </div>
     </div>
 </div>
@@ -355,13 +345,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-update time display
     function updateTime() {
         const now = new Date();
-        const timeElements = document.querySelectorAll('.current-time');
-        timeElements.forEach(element => {
-            element.textContent = now.toLocaleTimeString('id-ID', {
+        const currentTimeElement = document.getElementById('current-time');
+        if (currentTimeElement) {
+            currentTimeElement.textContent = now.toLocaleTimeString('id-ID', {
                 hour: '2-digit',
                 minute: '2-digit'
             });
-        });
+        }
     }
     
     // Update time every minute

@@ -62,20 +62,12 @@
                         Galeri
                     </a>
                     
-                    <a href="{{ route('admin.booking.index') }}" class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 
-                        {{ request()->routeIs('admin.booking*') ? 'bg-red-600 text-white shadow-lg border-l-4 border-red-800' : 'text-gray-700 hover:bg-red-50 hover:text-red-600 hover:translate-x-1' }}">
+                    <a href="{{ route('admin.payment-confirmations.index') }}" class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 
+                        {{ request()->routeIs('admin.payment-confirmations*') ? 'bg-red-600 text-white shadow-lg border-l-4 border-red-800' : 'text-gray-700 hover:bg-red-50 hover:text-red-600 hover:translate-x-1' }}">
                         <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                         </svg>
-                        Booking
-                    </a>
-                    
-                    <a href="{{ route('admin.laporan.index') }}" class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 
-                        {{ request()->routeIs('admin.laporan*') ? 'bg-red-600 text-white shadow-lg border-l-4 border-red-800' : 'text-gray-700 hover:bg-red-50 hover:text-red-600 hover:translate-x-1' }}">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                        </svg>
-                        Laporan
+                        Konfirmasi Pembayaran
                     </a>
                 </div>
                 

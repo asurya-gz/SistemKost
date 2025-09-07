@@ -66,9 +66,21 @@
                                         </span>
                                         @break
                                     @case('confirmed')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                            <div class="w-2 h-2 bg-blue-400 rounded-full mr-2 animate-pulse"></div>
+                                            Menunggu Verifikasi
+                                        </span>
+                                        @break
+                                    @case('need_revision')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                                            <div class="w-2 h-2 bg-orange-400 rounded-full mr-2 animate-pulse"></div>
+                                            Butuh Revisi
+                                        </span>
+                                        @break
+                                    @case('verified')
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                             <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                                            Terkonfirmasi
+                                            Terverifikasi
                                         </span>
                                         @break
                                     @case('expired')

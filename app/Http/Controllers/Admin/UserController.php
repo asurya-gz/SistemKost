@@ -19,6 +19,7 @@ class UserController extends Controller
         }
         
         $search = $request->get('search');
+        $roleFilter = $request->get('role_filter');
         
         $query = User::query();
         
@@ -30,10 +31,15 @@ class UserController extends Controller
             });
         }
         
+        // Apply role filter
+        if ($roleFilter && $roleFilter !== 'all') {
+            $query->where('role', $roleFilter);
+        }
+        
         $users = $query->paginate($perPage);
         $users->appends($request->query());
         
-        return view('admin.users.index', compact('users', 'perPage', 'search'));
+        return view('admin.users.index', compact('users', 'perPage', 'search', 'roleFilter'));
     }
 
     public function create()
@@ -115,6 +121,7 @@ class UserController extends Controller
     public function exportPdf(Request $request)
     {
         $search = $request->get('search');
+        $roleFilter = $request->get('role_filter');
         
         $query = User::query();
         
@@ -126,9 +133,14 @@ class UserController extends Controller
             });
         }
         
+        // Apply role filter
+        if ($roleFilter && $roleFilter !== 'all') {
+            $query->where('role', $roleFilter);
+        }
+        
         $users = $query->with('profile')->get();
         
-        $pdf = PDF::loadView('admin.users.pdf', compact('users', 'search'));
+        $pdf = PDF::loadView('admin.users.pdf', compact('users', 'search', 'roleFilter'));
         $pdf->setPaper('A4', 'landscape');
         
         $filename = 'daftar-users-' . date('Y-m-d-H-i-s') . '.pdf';

@@ -41,6 +41,14 @@
                     </svg>
                     Profile Saya
                 </a>
+
+                <!-- Mobile Change Password Button -->
+                <a href="{{ route('pengguna.change-password') }}" class="flex items-center w-full px-3 py-2 text-gray-700 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 12H9v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-1C2 13.896 2.896 13 4 13h2.343z"/>
+                    </svg>
+                    Ubah Password
+                </a>
                 
                 <!-- Mobile Logout Button -->
                 <form action="{{ route('logout') }}" method="POST" class="w-full">
@@ -101,6 +109,13 @@
                                     </svg>
                                     Profile Saya
                                 </a>
+
+                                <a href="{{ route('pengguna.change-password') }}" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 12H9v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-1C2 13.896 2.896 13 4 13h2.343z"/>
+                                    </svg>
+                                    Ubah Password
+                                </a>
                                 
                                 <hr class="border-gray-200">
                                 
@@ -160,7 +175,7 @@
         @endif
 
         <!-- Quick Actions -->
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             <!-- Lihat Kamar Available -->
             <a href="{{ route('rooms.index') }}" class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 group cursor-pointer block">
                 <div class="text-center">
@@ -208,6 +223,74 @@
                     </div>
                 </div>
             </a>
+
+            <!-- Kamar Saya (Only shown if user has verified booking) -->
+            @if($hasVerifiedBooking)
+                <a href="#" class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 group cursor-pointer block">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Kamar Saya</h3>
+                        <p class="text-gray-600 mb-4">{{ $currentBooking->kamar->nama_kamar ?? 'Lihat kamar yang sedang dihuni' }}</p>
+                        <div class="w-full bg-purple-500 hover:bg-purple-600 text-white py-3 rounded-xl font-semibold transition-all duration-300 group-hover:bg-purple-600">
+                            Lihat Kamar
+                        </div>
+                    </div>
+                </a>
+            @else
+                <!-- Disabled Kamar Saya -->
+                <div class="bg-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200 cursor-not-allowed opacity-60">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gray-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1M12 7C13.4 7 14.8 8.6 14.8 10V11C15.4 11 16 11.4 16 12V16C16 16.6 15.6 17 15 17H9C8.4 17 8 16.6 8 16V12C8 11.4 8.4 11 9 11V10C9 8.6 10.6 7 12 7M12 8.2C11.2 8.2 10.2 9.2 10.2 10V11H13.8V10C13.8 9.2 12.8 8.2 12 8.2Z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-500 mb-2">Kamar Saya</h3>
+                        <p class="text-gray-400 mb-4">Booking perlu diverifikasi admin dulu</p>
+                        <div class="w-full bg-gray-400 text-white py-3 rounded-xl font-semibold cursor-not-allowed">
+                            Tidak Tersedia
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Tagihan Saya (Only shown if user has verified booking) -->
+            @if($hasVerifiedBooking)
+                <a href="#" class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 group cursor-pointer block">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Tagihan Saya</h3>
+                        <p class="text-gray-600 mb-4">Rp {{ number_format($currentBooking->total_amount ?? 0, 0, ',', '.') }}/bulan</p>
+                        <div class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-xl font-semibold transition-all duration-300 group-hover:bg-orange-600">
+                            Lihat Tagihan
+                        </div>
+                    </div>
+                </a>
+            @else
+                <!-- Disabled Tagihan Saya -->
+                <div class="bg-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200 cursor-not-allowed opacity-60">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gray-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1M12 7C13.4 7 14.8 8.6 14.8 10V11C15.4 11 16 11.4 16 12V16C16 16.6 15.6 17 15 17H9C8.4 17 8 16.6 8 16V12C8 11.4 8.4 11 9 11V10C9 8.6 10.6 7 12 7M12 8.2C11.2 8.2 10.2 9.2 10.2 10V11H13.8V10C13.8 9.2 12.8 8.2 12 8.2Z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-500 mb-2">Tagihan Saya</h3>
+                        <p class="text-gray-400 mb-4">Booking perlu diverifikasi admin dulu</p>
+                        <div class="w-full bg-gray-400 text-white py-3 rounded-xl font-semibold cursor-not-allowed">
+                            Tidak Tersedia
+                        </div>
+                    </div>
+                </div>
+            @endif
             
         </div>
     </div>

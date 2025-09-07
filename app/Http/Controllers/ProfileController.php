@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
@@ -66,8 +67,14 @@ class ProfileController extends Controller
                     'size' => $request->file('ktp_file')->getSize(),
                     'type' => $request->file('ktp_file')->getMimeType(),
                     'name' => $request->file('ktp_file')->getClientOriginalName(),
-                ] : null
+                ] : null,
+                'all_request' => $request->all()
             ]);
+            
+            // Add custom error message for file upload issues
+            if (!$request->hasFile('ktp_file') && $validator->errors()->has('ktp_file')) {
+                $validator->errors()->add('ktp_file', 'File KTP belum dipilih atau gagal diupload. Silakan pilih file KTP Anda.');
+            }
             
             return redirect()->back()
                 ->withErrors($validator)
@@ -210,5 +217,41 @@ class ProfileController extends Controller
 
         return redirect()->route('pengguna.profile')
             ->with('success', 'Profil berhasil diperbarui!');
+    }
+
+    public function changePasswordForm()
+    {
+        $user = Auth::user();
+        return view('pengguna.change-password', compact('user'));
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = Auth::user();
+        
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|string|min:8|confirmed',
+        ], [
+            'current_password.required' => 'Password saat ini wajib diisi.',
+            'new_password.required' => 'Password baru wajib diisi.',
+            'new_password.min' => 'Password baru minimal 8 karakter.',
+            'new_password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        // Check if current password is correct
+        if (!Hash::check($request->current_password, $user->password)) {
+            return redirect()->back()
+                ->withErrors(['current_password' => 'Password saat ini tidak benar.'])
+                ->withInput();
+        }
+
+        // Update password
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return redirect()->route('pengguna.profile')
+            ->with('success', 'Password berhasil diubah!');
     }
 }

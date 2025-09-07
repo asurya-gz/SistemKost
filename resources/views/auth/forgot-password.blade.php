@@ -133,7 +133,7 @@
                         @endif
             
                         <!-- Forgot Password Form -->
-                        <form method="POST" action="{{ route('password.send') }}" id="forgotPasswordForm" class="space-y-6">
+                        <form id="forgotPasswordForm" class="space-y-6">
                             @csrf
                             
                             <!-- Email Field -->
@@ -141,24 +141,20 @@
                                 <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                     Email Address
                                 </label>
-                                <input type="email" id="email" name="email" required value="{{ $errors->has('email') ? '' : old('email') }}"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-300 @error('email') border-red-500 @enderror"
+                                <input type="email" id="email" name="email" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-300"
                                     placeholder="Masukkan email Anda">
                                 <div id="email-validation" class="mt-1 text-sm hidden">
                                     <span id="email-valid" class="text-green-600 hidden">✓ Format email valid</span>
                                     <span id="email-invalid" class="text-red-600 hidden">✗ Format email tidak valid</span>
                                 </div>
-                                @error('email')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
                             </div>
                 
-                            
                             <!-- Submit Button -->
                             <button type="submit" id="submitButton" disabled
                                 class="w-full py-3 px-4 rounded-lg font-semibold transition duration-300 shadow-lg cursor-not-allowed"
                                 style="background-color: #6b7280 !important; color: #d1d5db !important;">
-                                <span id="submitText">Kirim Password Sementara</span>
+                                <span id="submitText">Verifikasi Email</span>
                                 <svg id="loadingIcon" class="animate-spin ml-2 h-5 w-5 text-white hidden inline" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -192,7 +188,138 @@
     </div>
 </section>
 
+<!-- NIK Verification Modal -->
+<div id="nikModal" class="fixed inset-0 z-50 hidden overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);">
+    <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto transform transition-all duration-300" id="nikModalContent">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 rounded-t-2xl">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Verifikasi Identitas</h3>
+                            <p class="text-blue-100 text-sm">Masukkan NIK untuk konfirmasi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6">
+                <div class="mb-4">
+                    <p class="text-gray-600 text-sm mb-4">Email ditemukan! Untuk keamanan, silakan masukkan NIK yang terdaftar.</p>
+                </div>
+                
+                <form id="nikForm">
+                    <div class="mb-6">
+                        <label for="nik" class="block text-sm font-medium text-gray-700 mb-2">
+                            NIK (Nomor Induk Kependudukan)
+                        </label>
+                        <input type="text" id="nik" name="nik" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-300"
+                               placeholder="Masukkan 16 digit NIK">
+                        <div id="nikError" class="mt-2 text-sm text-red-600 hidden"></div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button type="button" onclick="closeNikModal()" 
+                                class="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition duration-300">
+                            Batal
+                        </button>
+                        <button type="submit" id="verifyNikBtn"
+                                class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                            Verifikasi NIK
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Reset Modal -->
+<div id="passwordModal" class="fixed inset-0 z-50 hidden overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);">
+    <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto transform transition-all duration-300" id="passwordModalContent">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4 rounded-t-2xl">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Reset Password</h3>
+                            <p class="text-green-100 text-sm">Buat password baru</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6">
+                <form id="resetPasswordForm">
+                    <div class="mb-4">
+                        <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                            Password Baru
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="newPassword" name="new_password" required
+                                   class="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-300"
+                                   placeholder="Masukkan password baru">
+                            <button type="button" class="absolute inset-y-0 right-0 flex items-center justify-center w-12 h-full text-gray-500 hover:text-gray-700 transition-colors duration-200" onclick="togglePasswordVisibility('newPassword', this)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                            Konfirmasi Password
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="confirmPassword" name="confirm_password" required
+                                   class="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-300"
+                                   placeholder="Konfirmasi password baru">
+                            <button type="button" class="absolute inset-y-0 right-0 flex items-center justify-center w-12 h-full text-gray-500 hover:text-gray-700 transition-colors duration-200" onclick="togglePasswordVisibility('confirmPassword', this)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="passwordError" class="mt-2 text-sm text-red-600 hidden"></div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button type="button" onclick="closePasswordModal()" 
+                                class="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition duration-300">
+                            Batal
+                        </button>
+                        <button type="submit" id="resetPasswordBtn"
+                                class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition duration-300">
+                            Reset Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+let currentUserEmail = '';
+
 document.addEventListener('DOMContentLoaded', function() {
     // Email validation
     const emailInput = document.getElementById('email');
@@ -243,13 +370,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Form submission
+    // Form submission - Email verification
     document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
         const email = emailInput.value;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         
         if (!emailRegex.test(email)) {
-            e.preventDefault();
             showAlert('Format email tidak valid!', 'error');
             return false;
         }
@@ -258,35 +386,220 @@ document.addEventListener('DOMContentLoaded', function() {
         const loadingIcon = document.getElementById('loadingIcon');
         
         submitButton.disabled = true;
-        submitText.textContent = 'Mengirim...';
+        submitText.textContent = 'Memverifikasi...';
         loadingIcon.classList.remove('hidden');
+        
+        // Check if email exists
+        fetch('/check-email-forgot-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ email: email })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentUserEmail = email;
+                openNikModal();
+                showAlert('Email ditemukan! Silakan verifikasi NIK.', 'success');
+            } else {
+                showAlert(data.message || 'Email tidak ditemukan di sistem.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Terjadi kesalahan. Silakan coba lagi.', 'error');
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+            submitText.textContent = 'Verifikasi Email';
+            loadingIcon.classList.add('hidden');
+        });
     });
     
-    // Show alert notification
-    function showAlert(message, type = 'error') {
-        const alertDiv = document.getElementById('alert-notification');
-        const alertMessage = document.getElementById('alert-message');
+    // NIK Form submission
+    document.getElementById('nikForm').addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        alertMessage.textContent = message;
+        const nik = document.getElementById('nik').value;
+        const nikError = document.getElementById('nikError');
         
-        if (type === 'error') {
-            alertDiv.className = 'fixed top-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg max-w-sm';
-        } else if (type === 'success') {
-            alertDiv.className = 'fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg max-w-sm';
+        if (nik.length !== 16) {
+            nikError.textContent = 'NIK harus 16 digit';
+            nikError.classList.remove('hidden');
+            return;
         }
         
-        alertDiv.classList.remove('hidden');
+        nikError.classList.add('hidden');
         
-        // Auto hide after 3 seconds
-        setTimeout(() => {
-            alertDiv.classList.add('hidden');
-        }, 3000);
+        const verifyBtn = document.getElementById('verifyNikBtn');
+        verifyBtn.disabled = true;
+        verifyBtn.textContent = 'Memverifikasi...';
+        
+        // Verify NIK
+        fetch('/verify-nik-forgot-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ 
+                email: currentUserEmail,
+                nik: nik 
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeNikModal();
+                openPasswordModal();
+                showAlert('NIK terverifikasi! Silakan buat password baru.', 'success');
+            } else {
+                nikError.textContent = data.message || 'NIK tidak cocok dengan data yang terdaftar';
+                nikError.classList.remove('hidden');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            nikError.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+            nikError.classList.remove('hidden');
+        })
+        .finally(() => {
+            verifyBtn.disabled = false;
+            verifyBtn.textContent = 'Verifikasi NIK';
+        });
+    });
+    
+    // Password Reset Form submission
+    document.getElementById('resetPasswordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const passwordError = document.getElementById('passwordError');
+        
+        if (newPassword.length < 6) {
+            passwordError.textContent = 'Password minimal 6 karakter';
+            passwordError.classList.remove('hidden');
+            return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            passwordError.textContent = 'Konfirmasi password tidak cocok';
+            passwordError.classList.remove('hidden');
+            return;
+        }
+        
+        passwordError.classList.add('hidden');
+        
+        const resetBtn = document.getElementById('resetPasswordBtn');
+        resetBtn.disabled = true;
+        resetBtn.textContent = 'Menyimpan...';
+        
+        // Reset password
+        fetch('/reset-password-forgot-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ 
+                email: currentUserEmail,
+                new_password: newPassword,
+                confirm_password: confirmPassword
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closePasswordModal();
+                showAlert('Password berhasil diubah! Silakan login dengan password baru.', 'success');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+            } else {
+                passwordError.textContent = data.message || 'Terjadi kesalahan saat mengubah password';
+                passwordError.classList.remove('hidden');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            passwordError.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+            passwordError.classList.remove('hidden');
+        })
+        .finally(() => {
+            resetBtn.disabled = false;
+            resetBtn.textContent = 'Reset Password';
+        });
+    });
+});
+
+// Modal functions
+function openNikModal() {
+    document.getElementById('nikModal').classList.remove('hidden');
+    document.getElementById('nik').focus();
+}
+
+function closeNikModal() {
+    document.getElementById('nikModal').classList.add('hidden');
+    document.getElementById('nikForm').reset();
+    document.getElementById('nikError').classList.add('hidden');
+}
+
+function openPasswordModal() {
+    document.getElementById('passwordModal').classList.remove('hidden');
+    document.getElementById('newPassword').focus();
+}
+
+function closePasswordModal() {
+    document.getElementById('passwordModal').classList.add('hidden');
+    document.getElementById('resetPasswordForm').reset();
+    document.getElementById('passwordError').classList.add('hidden');
+}
+
+// Password visibility toggle
+function togglePasswordVisibility(inputId, button) {
+    const input = document.getElementById(inputId);
+    const isPassword = input.type === 'password';
+    
+    input.type = isPassword ? 'text' : 'password';
+    
+    const svg = button.querySelector('svg');
+    if (isPassword) {
+        // Show eye-slash icon
+        svg.innerHTML = `
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+        `;
+    } else {
+        // Show eye icon
+        svg.innerHTML = `
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        `;
+    }
+}
+
+// Show alert notification
+function showAlert(message, type = 'error') {
+    const alertDiv = document.getElementById('alert-notification');
+    const alertMessage = document.getElementById('alert-message');
+    
+    alertMessage.textContent = message;
+    
+    if (type === 'error') {
+        alertDiv.className = 'fixed top-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg max-w-sm';
+    } else if (type === 'success') {
+        alertDiv.className = 'fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg max-w-sm';
     }
     
-    // Check for Laravel validation errors
-    @if($errors->has('email'))
-        showAlert('{{ $errors->first('email') }}', 'error');
-    @endif
-});
+    alertDiv.classList.remove('hidden');
+    
+    // Auto hide after 4 seconds
+    setTimeout(() => {
+        alertDiv.classList.add('hidden');
+    }, 4000);
+}
 </script>
 @endsection

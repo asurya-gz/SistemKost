@@ -5,23 +5,61 @@
 @section('page-title', 'Booking')
 
 @section('content')
-<div class="bg-white rounded-lg shadow-sm p-6">
+<div class="bg-white rounded-lg shadow-sm p-6 h-[90vh] flex flex-col">
     <div class="flex justify-between items-center mb-6">
         <h3 class="text-lg font-semibold text-gray-900">Daftar Booking</h3>
-        <div class="flex space-x-2">
-            <form method="GET" action="{{ route('admin.booking.index') }}" class="flex space-x-2">
-                <select name="status" onchange="this.form.submit()" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                    <option value="all" {{ request('status') === 'all' || !request('status') ? 'selected' : '' }}>Semua Status</option>
-                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
-                    <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                    <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>Expired</option>
-                </select>
-            </form>
-        </div>
     </div>
-    
-    <div class="overflow-x-auto">
+
+    <!-- Search and Filter Section -->
+    <div class="mb-6 bg-gray-50 p-4 rounded-lg">
+        <form method="GET" action="{{ route('admin.booking.index') }}" class="flex gap-4 items-center">
+            <!-- Search Input -->
+            <div class="flex-1">
+                <input type="text" 
+                       name="search" 
+                       id="search"
+                       value="{{ $search ?? '' }}"
+                       placeholder="Cari kode booking, nama user, email, atau nama kamar..."
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+            </div>
+            
+            <!-- Status Filter -->
+            <div class="min-w-40">
+                <select name="status_filter" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    <option value="all" {{ $statusFilter === 'all' || !$statusFilter ? 'selected' : '' }}>Semua Status</option>
+                    <option value="pending" {{ $statusFilter === 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="confirmed" {{ $statusFilter === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
+                    <option value="cancelled" {{ $statusFilter === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                    <option value="expired" {{ $statusFilter === 'expired' ? 'selected' : '' }}>Expired</option>
+                </select>
+            </div>
+            
+            <!-- Preserve per_page value -->
+            <input type="hidden" name="per_page" value="{{ $perPage }}">
+            
+            <!-- Action Buttons -->
+            <div class="flex space-x-2">
+                <button type="submit" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors flex items-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <span>Cari</span>
+                </button>
+                <a href="{{ route('admin.booking.index') }}" 
+                   class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors flex items-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    <span>Reset</span>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="flex-1 overflow-hidden flex flex-col">
+        <div class="flex-1 overflow-x-auto">
         <table class="w-full table-auto">
             <thead>
                 <tr class="bg-gray-50">
@@ -126,17 +164,146 @@
                 @endforelse
             </tbody>
         </table>
-    </div>
-    
-    <!-- Pagination -->
-    @if($bookings->hasPages())
-        <div class="mt-6 flex justify-center">
-            {{ $bookings->withQueryString()->links() }}
         </div>
-    @endif
+        
+        <!-- Pagination Links -->
+        <div class="mt-6 border-t border-gray-200 pt-4">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-700">
+                        Menampilkan <span class="font-medium">{{ $perPage }}</span> dari <span class="font-medium">{{ $bookings->total() }}</span> hasil
+                    </div>
+                    
+                    <!-- Per Page Selector -->
+                    <div class="flex items-center space-x-2">
+                        <label class="text-sm text-gray-600">Per halaman:</label>
+                        <select id="perPageSelect" 
+                                class="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                            <option value="3" {{ $perPage == 3 ? 'selected' : '' }}>3</option>
+                            <option value="5" {{ $perPage == 5 ? 'selected' : '' }}>5</option>
+                            <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                        </select>
+                    </div>
+                </div>
+                
+                @if($bookings->hasPages())
+                <div class="flex space-x-1">
+                    {{-- Previous Page Link --}}
+                    @if($bookings->onFirstPage())
+                        <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 border border-gray-300 rounded-md cursor-not-allowed">
+                            &laquo; Previous
+                        </span>
+                    @else
+                        <a href="{{ $bookings->previousPageUrl() }}" 
+                           class="px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-800 transition-colors">
+                            &laquo; Previous
+                        </a>
+                    @endif
+
+                    {{-- Page Numbers with Smart Display --}}
+                    @php
+                        $currentPage = $bookings->currentPage();
+                        $lastPage = $bookings->lastPage();
+                        $maxVisible = 5; // Maximum visible page numbers
+                        
+                        if ($lastPage <= $maxVisible) {
+                            // If total pages <= 5, show all
+                            $startPage = 1;
+                            $endPage = $lastPage;
+                        } else {
+                            // Smart pagination logic
+                            if ($currentPage <= 3) {
+                                $startPage = 1;
+                                $endPage = $maxVisible;
+                            } elseif ($currentPage >= $lastPage - 2) {
+                                $startPage = $lastPage - $maxVisible + 1;
+                                $endPage = $lastPage;
+                            } else {
+                                $startPage = $currentPage - 2;
+                                $endPage = $currentPage + 2;
+                            }
+                        }
+                    @endphp
+
+                    {{-- First page and ellipsis --}}
+                    @if($startPage > 1)
+                        <a href="{{ $bookings->url(1) }}" 
+                           class="px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-800 transition-colors">
+                            1
+                        </a>
+                        @if($startPage > 2)
+                            <span class="px-3 py-2 text-sm text-gray-500">...</span>
+                        @endif
+                    @endif
+
+                    {{-- Visible page range --}}
+                    @for($page = $startPage; $page <= $endPage; $page++)
+                        @if($page == $currentPage)
+                            <span class="px-3 py-2 text-sm font-medium text-white bg-red-600 border border-red-600 rounded-md">
+                                {{ $page }}
+                            </span>
+                        @else
+                            <a href="{{ $bookings->url($page) }}" 
+                               class="px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-800 transition-colors">
+                                {{ $page }}
+                            </a>
+                        @endif
+                    @endfor
+
+                    {{-- Last page and ellipsis --}}
+                    @if($endPage < $lastPage)
+                        @if($endPage < $lastPage - 1)
+                            <span class="px-3 py-2 text-sm text-gray-500">...</span>
+                        @endif
+                        <a href="{{ $bookings->url($lastPage) }}" 
+                           class="px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-800 transition-colors">
+                            {{ $lastPage }}
+                        </a>
+                    @endif
+
+                    {{-- Next Page Link --}}
+                    @if($bookings->hasMorePages())
+                        <a href="{{ $bookings->nextPageUrl() }}" 
+                           class="px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-800 transition-colors">
+                            Next &raquo;
+                        </a>
+                    @else
+                        <span class="px-3 py-2 text-sm text-gray-400 bg-gray-100 border border-gray-300 rounded-md cursor-not-allowed">
+                            Next &raquo;
+                        </span>
+                    @endif
+                </div>
+                @else
+                <div class="text-sm text-gray-500">
+                    Halaman 1 dari 1
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const perPageSelect = document.getElementById('perPageSelect');
+    
+    if (perPageSelect) {
+        perPageSelect.addEventListener('change', function() {
+            const selectedValue = this.value;
+            const currentUrl = new URL(window.location.href);
+            
+            // Update the per_page parameter
+            currentUrl.searchParams.set('per_page', selectedValue);
+            // Reset to page 1 when changing per_page
+            currentUrl.searchParams.delete('page');
+            
+            // Redirect to new URL
+            window.location.href = currentUrl.toString();
+        });
+    }
+});
+
 <script>
 function confirmBooking(bookingId) {
     if (confirm('Yakin ingin mengkonfirmasi booking ini?')) {

@@ -517,7 +517,7 @@
                                         </div>
                                         <div class="flex-1">
                                             <p class="font-bold text-gray-900 mb-1">Transfer Bank</p>
-                                            <p class="text-sm text-gray-500">BCA • Mandiri • BRI • BNI</p>
+                                            <p class="text-sm text-gray-500">BRI</p>
                                         </div>
                                         <div class="ml-4">
                                             <div class="w-5 h-5 border-2 border-gray-300 rounded-full relative transition-all duration-200">
@@ -528,51 +528,6 @@
                                 </div>
                             </label>
 
-                            <!-- E-Wallet -->
-                            <label class="group relative payment-method-option block">
-                                <input type="radio" name="payment_method" value="e_wallet" class="absolute opacity-0 peer">
-                                <div class="p-4 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-300 hover:border-green-300 hover:bg-green-50 peer-checked:border-green-500 peer-checked:bg-green-50 peer-checked:ring-2 peer-checked:ring-green-200">
-                                    <div class="flex items-center">
-                                        <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center mr-4 group-hover:from-green-200 group-hover:to-green-300 transition-all">
-                                            <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M21 18v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v13zm-2-1V5H5v12h14zM7 10h2v4H7v-4zm4-2h2v6h-2V8zm4 1h2v5h-2V9z"/>
-                                            </svg>
-                                        </div>
-                                        <div class="flex-1">
-                                            <p class="font-bold text-gray-900 mb-1">E-Wallet</p>
-                                            <p class="text-sm text-gray-500">OVO • GoPay • DANA • ShopeePay</p>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="w-5 h-5 border-2 border-gray-300 rounded-full relative transition-all duration-200">
-                                                <div class="absolute inset-1 bg-red-600 rounded-full opacity-0 transform scale-0 transition-all duration-200"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </label>
-
-                            <!-- Virtual Account -->
-                            <label class="group relative payment-method-option block">
-                                <input type="radio" name="payment_method" value="virtual_account" class="absolute opacity-0 peer">
-                                <div class="p-4 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-300 hover:border-purple-300 hover:bg-purple-50 peer-checked:border-purple-500 peer-checked:bg-purple-50 peer-checked:ring-2 peer-checked:ring-purple-200">
-                                    <div class="flex items-center">
-                                        <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center mr-4 group-hover:from-purple-200 group-hover:to-purple-300 transition-all">
-                                            <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M4 4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h16v2H4V6zm0 4h16v8H4v-8zm2 2h4v4H6v-4zm6 0h4v2h-4v-2zm0 3h4v1h-4v-1z"/>
-                                            </svg>
-                                        </div>
-                                        <div class="flex-1">
-                                            <p class="font-bold text-gray-900 mb-1">Virtual Account</p>
-                                            <p class="text-sm text-gray-500">VA BCA • VA Mandiri • VA BRI</p>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="w-5 h-5 border-2 border-gray-300 rounded-full relative transition-all duration-200">
-                                                <div class="absolute inset-1 bg-red-600 rounded-full opacity-0 transform scale-0 transition-all duration-200"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </label>
 
                             <!-- Cash -->
                             <label class="group relative payment-method-option block">
@@ -964,8 +919,6 @@ document.addEventListener('DOMContentLoaded', function() {
             paymentOptions.forEach(opt => {
                 const optDiv = opt.querySelector('div[class*="border-2"]');
                 optDiv.classList.remove('border-blue-500', 'bg-blue-50', 'ring-2', 'ring-blue-200');
-                optDiv.classList.remove('border-green-500', 'bg-green-50', 'ring-2', 'ring-green-200');
-                optDiv.classList.remove('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-200');
                 optDiv.classList.remove('border-yellow-500', 'bg-yellow-50', 'ring-2', 'ring-yellow-200');
                 optDiv.classList.add('border-gray-200');
                 
@@ -992,10 +945,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Apply color based on payment method
             if (value === 'transfer_bank') {
                 optDiv.classList.add('border-blue-500', 'bg-blue-50', 'ring-2', 'ring-blue-200');
-            } else if (value === 'e_wallet') {
-                optDiv.classList.add('border-green-500', 'bg-green-50', 'ring-2', 'ring-green-200');
-            } else if (value === 'virtual_account') {
-                optDiv.classList.add('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-200');
             } else if (value === 'cash') {
                 optDiv.classList.add('border-yellow-500', 'bg-yellow-50', 'ring-2', 'ring-yellow-200');
             }

@@ -21,12 +21,23 @@ class Booking extends Model
         'booking_expires_at',
         'payment_deadline',
         'notes',
+        'transfer_proof',
+        'payment_notes',
+        'confirmed_at',
+        'rejection_reason',
+        'rejected_at',
+        'rejected_by',
+        'verified_at',
+        'verified_by',
     ];
 
     protected $casts = [
         'total_amount' => 'decimal:2',
         'booking_expires_at' => 'datetime',
         'payment_deadline' => 'datetime',
+        'confirmed_at' => 'datetime',
+        'rejected_at' => 'datetime',
+        'verified_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

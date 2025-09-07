@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kamar;
+use App\Models\TypeKamar;
+use App\Models\KebijakanKamar;
 use Illuminate\Http\Request;
 use PDF;
 
@@ -46,12 +48,30 @@ class KamarController extends Controller
 
     public function create()
     {
-        return view('admin.kamar.create');
+        $typeKamars = TypeKamar::orderBy('nama')->get();
+        $kebijakanKamars = KebijakanKamar::orderBy('deskripsi')->get();
+        
+        return view('admin.kamar.create', compact('typeKamars', 'kebijakanKamars'));
     }
 
     public function store(Request $request)
     {
-        // Implementation for storing kamar
+        $request->validate([
+            'nama_kamar' => 'required|string|max:255|unique:kamar,nama_kamar',
+            'type_kamar_id' => 'required|exists:type_kamar,id',
+            'status_kamar' => 'required|in:Tersedia,Dihuni,Maintenance',
+            'kebijakan_kamar_ids' => 'nullable|array',
+            'kebijakan_kamar_ids.*' => 'exists:kebijakan_kamar,id'
+        ]);
+
+        $kamar = Kamar::create([
+            'nama_kamar' => $request->nama_kamar,
+            'type_kamar_id' => $request->type_kamar_id,
+            'status_kamar' => $request->status_kamar,
+            'kebijakan_kamar_ids' => $request->kebijakan_kamar_ids ?? []
+        ]);
+
+        return redirect()->route('admin.kamar.index')->with('success', 'Kamar berhasil ditambahkan!');
     }
 
     public function show($id)

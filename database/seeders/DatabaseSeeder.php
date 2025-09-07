@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             GallerySeeder::class,
             KebijakanKamarSeeder::class,
+            TypeKamarSeeder::class,
             KamarSeeder::class,
         ]);
     }

@@ -149,6 +149,98 @@ class LoginController extends Controller
         }
     }
 
+    // New forgot password flow methods
+    public function checkEmailForgotPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Email ditemukan'
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Email tidak ditemukan di sistem'
+        ]);
+    }
+
+    public function verifyNikForgotPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'nik' => 'required|string|size:16'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email tidak ditemukan'
+            ]);
+        }
+
+        // Check if user has profile with NIK
+        if (!$user->profile || !$user->profile->nik) {
+            return response()->json([
+                'success' => false,
+                'message' => 'NIK belum terdaftar untuk akun ini'
+            ]);
+        }
+
+        // Verify NIK matches
+        if ($user->profile->nik !== $request->nik) {
+            return response()->json([
+                'success' => false,
+                'message' => 'NIK tidak cocok dengan data yang terdaftar'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'NIK terverifikasi'
+        ]);
+    }
+
+    public function resetPasswordForgotPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'new_password' => 'required|string|min:6',
+            'confirm_password' => 'required|string|same:new_password'
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email tidak ditemukan'
+            ]);
+        }
+
+        // Update password
+        $user->password = Hash::make($request->new_password);
+        
+        // Clear temporary password if exists
+        $user->temp_password = null;
+        $user->temp_password_expires_at = null;
+        
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password berhasil diubah'
+        ]);
+    }
+
     protected function validator(array $data)
     {
         return Validator::make($data, [

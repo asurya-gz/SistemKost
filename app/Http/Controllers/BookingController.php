@@ -15,7 +15,7 @@ class BookingController extends Controller
     {
         $request->validate([
             'kamar_id' => 'required|exists:kamar,id',
-            'payment_method' => 'required|in:transfer_bank,e_wallet,virtual_account,cash',
+            'payment_method' => 'required|in:transfer_bank,cash',
             'notes' => 'nullable|string|max:500'
         ]);
 
@@ -138,9 +138,14 @@ class BookingController extends Controller
 
     public function confirm(Request $request, $bookingCode)
     {
+        $request->validate([
+            'transfer_proof' => 'required|file|mimes:jpeg,jpg,png,pdf|max:5120', // 5MB max
+            'payment_notes' => 'nullable|string|max:500'
+        ]);
+
         $booking = Booking::where('booking_code', $bookingCode)
                          ->where('user_id', Auth::id())
-                         ->where('status', 'pending')
+                         ->whereIn('status', ['pending', 'need_revision'])
                          ->firstOrFail();
 
         // Check if booking is not expired
@@ -153,18 +158,35 @@ class BookingController extends Controller
 
         DB::beginTransaction();
         try {
-            $booking->confirm();
+            // Handle file upload
+            $transferProofPath = null;
+            if ($request->hasFile('transfer_proof')) {
+                $file = $request->file('transfer_proof');
+                $transferProofPath = $file->store('transfer_proofs', 'public');
+            }
+
+            // Update booking with payment confirmation
+            $booking->update([
+                'status' => 'confirmed',
+                'transfer_proof' => $transferProofPath,
+                'payment_notes' => $request->payment_notes,
+                'confirmed_at' => now()
+            ]);
+
+            // Note: Room status will be updated to 'Dihuni' only when admin approves the payment
+            // This happens in Admin\BookingController@approvePayment method
+
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Booking berhasil dikonfirmasi'
+                'message' => 'Pembayaran berhasil dikonfirmasi dan sedang diverifikasi admin'
             ]);
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mengkonfirmasi booking'
+                'message' => 'Terjadi kesalahan saat mengkonfirmasi pembayaran'
             ], 500);
         }
     }

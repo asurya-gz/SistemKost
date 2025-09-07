@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\TypeKamar;
+use App\Models\FasilitasKost;
+use App\Models\FasilitasKamar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use PDF;
@@ -41,12 +43,49 @@ class TypeKamarController extends Controller
 
     public function create()
     {
-        return view('admin.type-kamar.create');
+        $fasilitasKost = FasilitasKost::orderBy('nama')->get();
+        $fasilitasKamar = FasilitasKamar::orderBy('nama')->get();
+        
+        return view('admin.type-kamar.create', compact('fasilitasKost', 'fasilitasKamar'));
     }
 
     public function store(Request $request)
     {
-        // Implementation for storing type kamar
+        $request->validate([
+            'nama' => 'required|string|max:255|unique:type_kamar,nama',
+            'deskripsi' => 'required|string',
+            'ukuran_kamar' => 'required|string|max:100',
+            'type_kasur' => 'required|in:Single Bed,Double Bed,Queen Bed,King Bed',
+            'harga' => 'required|numeric|min:0',
+            'gambar' => 'nullable|array',
+            'gambar.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'fasilitas_kost' => 'nullable|array',
+            'fasilitas_kost.*' => 'exists:fasilitas_kost,id',
+            'fasilitas_kamar' => 'nullable|array',
+            'fasilitas_kamar.*' => 'exists:fasilitas_kamar,id'
+        ]);
+
+        // Handle image upload
+        $gambarPaths = [];
+        if ($request->hasFile('gambar')) {
+            foreach ($request->file('gambar') as $file) {
+                $path = $file->store('type-kamar', 'public');
+                $gambarPaths[] = $path;
+            }
+        }
+
+        $typeKamar = TypeKamar::create([
+            'nama' => $request->nama,
+            'deskripsi' => $request->deskripsi,
+            'ukuran_kamar' => $request->ukuran_kamar,
+            'type_kasur' => $request->type_kasur,
+            'harga' => $request->harga,
+            'gambar' => $gambarPaths,
+            'fasilitas_kost' => $request->fasilitas_kost ?? [],
+            'fasilitas_kamar' => $request->fasilitas_kamar ?? []
+        ]);
+
+        return redirect()->route('admin.type-kamar.index')->with('success', 'Tipe kamar berhasil ditambahkan!');
     }
 
     public function show($id)

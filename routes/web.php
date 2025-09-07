@@ -13,7 +13,9 @@ use App\Http\Controllers\Admin\TypeKamarController;
 use App\Http\Controllers\Admin\GaleriController;
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\LegalController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -23,6 +25,11 @@ Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->na
 Route::post('/register', [RegisterController::class, 'register']);
 Route::get('/forgot-password', [LoginController::class, 'showForgotPasswordForm'])->name('password.request');
 Route::post('/forgot-password', [LoginController::class, 'sendTemporaryPassword'])->name('password.send');
+
+// New forgot password flow routes
+Route::post('/check-email-forgot-password', [LoginController::class, 'checkEmailForgotPassword']);
+Route::post('/verify-nik-forgot-password', [LoginController::class, 'verifyNikForgotPassword']);
+Route::post('/reset-password-forgot-password', [LoginController::class, 'resetPasswordForgotPassword']);
 
 // Public pages
 Route::get('/syarat-ketentuan', [LegalController::class, 'terms'])->name('terms');
@@ -47,9 +54,9 @@ Route::post('/logout', function () {
 Route::middleware(['auth'])->group(function () {
     // Admin routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('admin.dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/export/pdf', [DashboardController::class, 'exportPdf'])->name('dashboard.export.pdf');
+        Route::get('/dashboard/export/excel', [DashboardController::class, 'exportExcel'])->name('dashboard.export.excel');
         
         Route::resource('users', UserController::class);
         Route::post('users/{id}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
@@ -64,12 +71,14 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('booking', AdminBookingController::class);
         Route::post('booking/{id}/confirm', [AdminBookingController::class, 'confirm'])->name('admin.booking.confirm');
         Route::post('booking/{id}/cancel', [AdminBookingController::class, 'cancel'])->name('admin.booking.cancel');
+        Route::get('payment-confirmations', [AdminBookingController::class, 'paymentConfirmations'])->name('payment-confirmations.index');
+        Route::post('payment-confirmations/{id}/approve', [AdminBookingController::class, 'approvePayment'])->name('payment-confirmations.approve');
+        Route::post('payment-confirmations/{id}/reject', [AdminBookingController::class, 'rejectPayment'])->name('payment-confirmations.reject');
         Route::resource('laporan', LaporanController::class);
     });
     
-    Route::get('/pengguna/dashboard', function () {
-        return view('pengguna.dashboard');
-    })->name('pengguna.dashboard')->middleware(['role:pengguna', 'profile.completed']);
+    Route::get('/pengguna/dashboard', [PenggunaController::class, 'dashboard'])
+        ->name('pengguna.dashboard')->middleware(['role:pengguna', 'profile.completed']);
     
     // Profile routes for users
     Route::middleware('role:pengguna')->group(function () {
@@ -78,6 +87,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/profile', [ProfileController::class, 'show'])->name('pengguna.profile')->middleware('profile.completed');
         Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('pengguna.profile.edit')->middleware('profile.completed');
         Route::post('/profile/update', [ProfileController::class, 'update'])->name('pengguna.profile.update')->middleware('profile.completed');
+        Route::get('/change-password', [ProfileController::class, 'changePasswordForm'])->name('pengguna.change-password')->middleware('profile.completed');
+        Route::post('/change-password', [ProfileController::class, 'changePassword'])->name('pengguna.change-password.update')->middleware('profile.completed');
         
         // Booking routes for users
         Route::middleware('profile.completed')->group(function () {

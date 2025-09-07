@@ -10,16 +10,41 @@ class BookingController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Booking::with(['user', 'kamar.typeKamar']);
+        $perPage = $request->get('per_page', 10);
+        $allowedPerPage = [3, 5, 10];
         
-        // Filter by status if provided
-        if ($request->filled('status') && $request->status !== 'all') {
-            $query->where('status', $request->status);
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
         }
         
-        $bookings = $query->orderBy('created_at', 'desc')->paginate(15);
+        $search = $request->get('search');
+        $statusFilter = $request->get('status_filter');
         
-        return view('admin.booking.index', compact('bookings'));
+        $query = Booking::with(['user', 'kamar.typeKamar']);
+        
+        // Apply search filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('booking_code', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('email', 'like', '%' . $search . '%');
+                  })
+                  ->orWhereHas('kamar', function($kamarQuery) use ($search) {
+                      $kamarQuery->where('nama_kamar', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+        
+        // Apply status filter
+        if ($statusFilter && $statusFilter !== 'all') {
+            $query->where('status', $statusFilter);
+        }
+        
+        $bookings = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        $bookings->appends($request->query());
+        
+        return view('admin.booking.index', compact('bookings', 'perPage', 'search', 'statusFilter'));
     }
 
     public function create()
@@ -100,6 +125,111 @@ class BookingController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal membatalkan booking: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function paymentConfirmations(Request $request)
+    {
+        $perPage = $request->get('per_page', 10);
+        $allowedPerPage = [3, 5, 10];
+        
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
+        }
+        
+        $search = $request->get('search');
+        
+        // Get bookings with confirmed status (awaiting verification)
+        $query = Booking::with(['user', 'kamar.typeKamar'])
+                       ->where('status', 'confirmed')
+                       ->whereNotNull('transfer_proof');
+        
+        // Apply search filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('booking_code', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('email', 'like', '%' . $search . '%');
+                  })
+                  ->orWhereHas('kamar', function($kamarQuery) use ($search) {
+                      $kamarQuery->where('nama_kamar', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+        
+        $confirmations = $query->orderBy('confirmed_at', 'desc')->paginate($perPage);
+        $confirmations->appends($request->query());
+        
+        return view('admin.payment-confirmations.index', compact('confirmations', 'perPage', 'search'));
+    }
+
+    public function approvePayment($id)
+    {
+        try {
+            $booking = Booking::findOrFail($id);
+            
+            if ($booking->status !== 'confirmed') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pembayaran tidak dapat disetujui karena status booking bukan confirmed'
+                ]);
+            }
+            
+            // Update booking to verified status
+            $booking->update([
+                'status' => 'verified',
+                'verified_at' => now(),
+                'verified_by' => auth()->id()
+            ]);
+            
+            // Update room status to occupied
+            $booking->kamar->update(['status_kamar' => 'Dihuni']);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Pembayaran berhasil disetujui dan booking dikonfirmasi'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyetujui pembayaran: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function rejectPayment(Request $request, $id)
+    {
+        try {
+            $booking = Booking::findOrFail($id);
+            
+            if ($booking->status !== 'confirmed') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pembayaran tidak dapat ditolak karena status booking bukan confirmed'
+                ]);
+            }
+            
+            // Update booking to need_revision status
+            $booking->update([
+                'status' => 'need_revision',
+                'rejection_reason' => $request->reason,
+                'rejected_at' => now(),
+                'rejected_by' => auth()->id()
+            ]);
+            
+            // Keep room status as booked since user still has the booking
+            // They just need to revise their payment proof
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Pembayaran ditolak. Pengguna perlu merevisi bukti pembayaran.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menolak pembayaran: ' . $e->getMessage()
             ]);
         }
     }
