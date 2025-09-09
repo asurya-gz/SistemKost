@@ -16,6 +16,7 @@ class BookingController extends Controller
         $request->validate([
             'kamar_id' => 'required|exists:kamar,id',
             'payment_method' => 'required|in:transfer_bank,cash',
+            'rental_duration_months' => 'required|in:3,6,9,12',
             'notes' => 'nullable|string|max:500'
         ]);
 
@@ -45,6 +46,11 @@ class BookingController extends Controller
 
         DB::beginTransaction();
         try {
+            // Calculate total amount based on duration
+            $monthlyRate = $kamar->typeKamar->harga;
+            $duration = $request->rental_duration_months;
+            $totalAmount = $monthlyRate * $duration;
+
             // Create booking
             $booking = Booking::create([
                 'user_id' => $user->id,
@@ -52,7 +58,8 @@ class BookingController extends Controller
                 'booking_code' => Booking::generateBookingCode(),
                 'status' => 'pending',
                 'payment_method' => $request->payment_method,
-                'total_amount' => $kamar->typeKamar->harga,
+                'total_amount' => $totalAmount,
+                'rental_duration_months' => $duration,
                 'booking_expires_at' => Carbon::now()->addMinutes(30),
                 'notes' => $request->notes
             ]);
@@ -242,5 +249,50 @@ class BookingController extends Controller
                          ->firstOrFail();
 
         return view('booking.detail', compact('booking'));
+    }
+
+    public function requestExtension(Request $request, $bookingCode)
+    {
+        $request->validate([
+            'rental_duration_months' => 'required|in:3,6,9,12'
+        ]);
+
+        $booking = Booking::where('booking_code', $bookingCode)
+                         ->where('user_id', Auth::id())
+                         ->where('status', 'confirmed')
+                         ->firstOrFail();
+
+        // Check if booking is still active
+        if (!$booking->rental_end_date || $booking->rental_end_date < Carbon::now()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Masa sewa telah berakhir'
+            ], 400);
+        }
+
+        // Check if already requested extension
+        if ($booking->extension_requested) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Permintaan perpanjangan sudah diajukan sebelumnya'
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            $booking->requestExtension($request->rental_duration_months);
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Permintaan perpanjangan berhasil diajukan'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengajukan perpanjangan'
+            ], 500);
+        }
     }
 }

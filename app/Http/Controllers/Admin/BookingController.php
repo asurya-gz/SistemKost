@@ -233,4 +233,95 @@ class BookingController extends Controller
             ]);
         }
     }
+
+    public function extensionRequests(Request $request)
+    {
+        $perPage = $request->get('per_page', 10);
+        $allowedPerPage = [3, 5, 10];
+        
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 10;
+        }
+        
+        $search = $request->get('search');
+        
+        // Get bookings with extension requests
+        $query = Booking::with(['user', 'kamar.typeKamar'])
+                       ->where('extension_requested', true);
+        
+        // Apply search filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('booking_code', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('email', 'like', '%' . $search . '%');
+                  })
+                  ->orWhereHas('kamar', function($kamarQuery) use ($search) {
+                      $kamarQuery->where('nama_kamar', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+        
+        $extensions = $query->orderBy('updated_at', 'desc')->paginate($perPage);
+        $extensions->appends($request->query());
+        
+        return view('admin.extensions.index', compact('extensions', 'perPage', 'search'));
+    }
+
+    public function approveExtension($id)
+    {
+        try {
+            $booking = Booking::findOrFail($id);
+            
+            if (!$booking->extension_requested) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada permintaan perpanjangan untuk booking ini'
+                ]);
+            }
+            
+            $booking->approveExtension();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Perpanjangan berhasil disetujui'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyetujui perpanjangan: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function rejectExtension(Request $request, $id)
+    {
+        try {
+            $booking = Booking::findOrFail($id);
+            
+            if (!$booking->extension_requested) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada permintaan perpanjangan untuk booking ini'
+                ]);
+            }
+            
+            // Reset extension request
+            $booking->update([
+                'extension_requested' => false,
+                'rental_duration_months' => 3
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Perpanjangan ditolak'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menolak perpanjangan: ' . $e->getMessage()
+            ]);
+        }
+    }
 }

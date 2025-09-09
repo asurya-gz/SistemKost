@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin: 5px 0; }
+        input, select, textarea, button { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #dc2626; color: white; cursor: pointer; padding: 10px 20px; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .log { margin: 5px 0; padding: 5px; background: #e8f4f8; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>Booking Debug Test</h1>
+    
+    <div class="section">
+        <h2>Form Test</h2>
+        <div class="form-group">
+            <label>Durasi Sewa:</label>
+            <input type="radio" name="rental_duration_months" value="3" id="duration_3"> <label for="duration_3">3 Bulan</label>
+            <input type="radio" name="rental_duration_months" value="6" id="duration_6"> <label for="duration_6">6 Bulan</label>
+            <input type="radio" name="rental_duration_months" value="9" id="duration_9"> <label for="duration_9">9 Bulan</label>
+            <input type="radio" name="rental_duration_months" value="12" id="duration_12"> <label for="duration_12">12 Bulan</label>
+        </div>
+        
+        <div class="form-group">
+            <label>Metode Pembayaran:</label>
+            <input type="radio" name="payment_method" value="transfer_bank" id="payment_bank"> <label for="payment_bank">Transfer Bank</label>
+            <input type="radio" name="payment_method" value="cash" id="payment_cash"> <label for="payment_cash">Cash</label>
+        </div>
+        
+        <div class="form-group">
+            <label for="notes">Catatan:</label>
+            <textarea id="notes" rows="3" placeholder="Catatan tambahan..."></textarea>
+        </div>
+        
+        <button id="processBtn" onclick="testBooking()">Test Booking Process</button>
+    </div>
+    
+    <div class="section">
+        <h2>Debug Log</h2>
+        <div id="debugLog" class="debug"></div>
+    </div>
+
+    <script>
+        function log(message, data = null) {
+            const logEl = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const logItem = document.createElement('div');
+            logItem.className = 'log';
+            logItem.innerHTML = `<strong>${timestamp}:</strong> ${message}` + (data ? `<br><pre>${JSON.stringify(data, null, 2)}</pre>` : '');
+            logEl.appendChild(logItem);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function testBooking() {
+            log('=== Starting Booking Test ===');
+            
+            const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
+            const selectedDuration = document.querySelector('input[name="rental_duration_months"]:checked');
+            const notes = document.getElementById('notes').value;
+            
+            log('Form Elements Found:', {
+                paymentRadios: document.querySelectorAll('input[name="payment_method"]').length,
+                durationRadios: document.querySelectorAll('input[name="rental_duration_months"]').length,
+                notesField: document.getElementById('notes') ? 'Found' : 'Not Found'
+            });
+            
+            log('Selected Values:', {
+                payment: selectedPayment?.value || 'NONE',
+                duration: selectedDuration?.value || 'NONE',
+                notes: notes || 'EMPTY'
+            });
+            
+            if (!selectedPayment) {
+                log('ERROR: No payment method selected');
+                alert('Silakan pilih metode pembayaran');
+                return;
+            }
+            
+            if (!selectedDuration) {
+                log('ERROR: No rental duration selected');
+                alert('Silakan pilih durasi sewa');
+                return;
+            }
+            
+            const bookingData = {
+                kamar_id: 1, // test value
+                payment_method: selectedPayment.value,
+                rental_duration_months: parseInt(selectedDuration.value),
+                notes: notes
+            };
+            
+            log('Booking Data Prepared:', bookingData);
+            
+            // Test with dummy endpoint first
+            log('Testing form validation... ✅ All validations passed!');
+            alert('Form validation passed! Check debug log for details.');
+        }
+
+        // Auto-select defaults for testing
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM Content Loaded');
+            
+            // Auto-select first options for testing
+            setTimeout(() => {
+                const firstDuration = document.querySelector('input[name="rental_duration_months"]');
+                const firstPayment = document.querySelector('input[name="payment_method"]');
+                
+                if (firstDuration) {
+                    firstDuration.checked = true;
+                    log('Auto-selected duration: 3 months');
+                }
+                
+                if (firstPayment) {
+                    firstPayment.checked = true;
+                    log('Auto-selected payment: transfer_bank');
+                }
+            }, 500);
+        });
+        
+        // Add event listeners to track changes
+        document.addEventListener('change', function(e) {
+            if (e.target.name === 'payment_method') {
+                log(`Payment method changed to: ${e.target.value}`);
+            } else if (e.target.name === 'rental_duration_months') {
+                log(`Rental duration changed to: ${e.target.value} months`);
+            }
+        });
+    </script>
+</body>
+</html>

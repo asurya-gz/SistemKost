@@ -18,6 +18,12 @@ class Booking extends Model
         'status',
         'payment_method',
         'total_amount',
+        'rental_duration_months',
+        'rental_start_date',
+        'rental_end_date',
+        'billing_notification_sent_at',
+        'extension_requested',
+        'extension_deadline',
         'booking_expires_at',
         'payment_deadline',
         'notes',
@@ -33,6 +39,12 @@ class Booking extends Model
 
     protected $casts = [
         'total_amount' => 'decimal:2',
+        'rental_duration_months' => 'integer',
+        'rental_start_date' => 'datetime',
+        'rental_end_date' => 'datetime',
+        'billing_notification_sent_at' => 'datetime',
+        'extension_requested' => 'boolean',
+        'extension_deadline' => 'datetime',
         'booking_expires_at' => 'datetime',
         'payment_deadline' => 'datetime',
         'confirmed_at' => 'datetime',
@@ -68,6 +80,21 @@ class Booking extends Model
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
+    }
+
+    public function scopeNearingExpiration($query, $days = 7)
+    {
+        return $query->where('status', 'confirmed')
+                    ->where('rental_end_date', '<=', Carbon::now()->addDays($days))
+                    ->where('rental_end_date', '>', Carbon::now())
+                    ->whereNull('billing_notification_sent_at');
+    }
+
+    public function scopeExpiredRental($query)
+    {
+        return $query->where('status', 'confirmed')
+                    ->where('rental_end_date', '<', Carbon::now())
+                    ->where('extension_requested', false);
     }
 
     // Accessors
@@ -120,7 +147,9 @@ class Booking extends Model
     {
         $this->update([
             'status' => 'confirmed',
-            'payment_deadline' => Carbon::now()->addDays(3)
+            'payment_deadline' => Carbon::now()->addDays(3),
+            'rental_start_date' => Carbon::now(),
+            'rental_end_date' => Carbon::now()->addMonths($this->rental_duration_months ?? 3)
         ]);
         
         // Keep room as booked
@@ -133,5 +162,67 @@ class Booking extends Model
         
         // Make room available again
         $this->kamar->update(['status_kamar' => 'Tersedia']);
+    }
+
+    public function sendBillingNotification(): void
+    {
+        $this->update([
+            'billing_notification_sent_at' => Carbon::now(),
+            'extension_deadline' => $this->rental_end_date->addDays(7)
+        ]);
+    }
+
+    public function requestExtension(int $months = 3): void
+    {
+        $this->update([
+            'extension_requested' => true,
+            'rental_duration_months' => $months
+        ]);
+    }
+
+    public function approveExtension(): void
+    {
+        $newEndDate = $this->rental_end_date->addMonths($this->rental_duration_months);
+        
+        $this->update([
+            'rental_end_date' => $newEndDate,
+            'extension_requested' => false,
+            'billing_notification_sent_at' => null,
+            'extension_deadline' => null
+        ]);
+    }
+
+    public function expireRental(): void
+    {
+        $this->update(['status' => 'expired']);
+        
+        // Make room available again
+        $this->kamar->update(['status_kamar' => 'Tersedia']);
+    }
+
+    public function getDaysUntilExpirationAttribute(): int
+    {
+        if (!$this->rental_end_date) {
+            return 0;
+        }
+        
+        return Carbon::now()->diffInDays($this->rental_end_date, false);
+    }
+
+    public function getIsNearExpirationAttribute(): bool
+    {
+        return $this->status === 'confirmed' 
+            && $this->rental_end_date 
+            && $this->rental_end_date->diffInDays(Carbon::now()) <= 7;
+    }
+
+    public static function getRentalDurationOptions(): array
+    {
+        return [
+            3 => '3 Bulan',
+            6 => '6 Bulan', 
+            9 => '9 Bulan',
+            12 => '12 Bulan'
+        ];
     }
 }

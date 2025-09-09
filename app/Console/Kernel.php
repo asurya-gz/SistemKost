@@ -14,6 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\ExpireBookingsCommand::class,
+        Commands\SendBillingNotificationsCommand::class,
+        Commands\ExpireRentalBookingsCommand::class,
     ];
 
     /**
@@ -29,6 +31,16 @@ class Kernel extends ConsoleKernel
                  ->everyFiveMinutes()
                  ->withoutOverlapping()
                  ->runInBackground();
+
+        // Send billing notifications daily at 09:00 AM
+        $schedule->command('booking:send-billing-notifications')
+                 ->dailyAt('09:00')
+                 ->withoutOverlapping();
+
+        // Expire rentals daily at 00:05 AM (after potential extensions)
+        $schedule->command('booking:expire-rentals')
+                 ->dailyAt('00:05')
+                 ->withoutOverlapping();
     }
 
     /**

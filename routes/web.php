@@ -74,6 +74,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('payment-confirmations', [AdminBookingController::class, 'paymentConfirmations'])->name('payment-confirmations.index');
         Route::post('payment-confirmations/{id}/approve', [AdminBookingController::class, 'approvePayment'])->name('payment-confirmations.approve');
         Route::post('payment-confirmations/{id}/reject', [AdminBookingController::class, 'rejectPayment'])->name('payment-confirmations.reject');
+        Route::get('extension-requests', [AdminBookingController::class, 'extensionRequests'])->name('extension-requests.index');
+        Route::post('extension-requests/{id}/approve', [AdminBookingController::class, 'approveExtension'])->name('extension-requests.approve');
+        Route::post('extension-requests/{id}/reject', [AdminBookingController::class, 'rejectExtension'])->name('extension-requests.reject');
+        
+        // Occupancy monitoring routes
+        Route::get('occupancy', [\App\Http\Controllers\Admin\OccupancyController::class, 'index'])->name('occupancy.index');
+        Route::get('occupancy/{id}', [\App\Http\Controllers\Admin\OccupancyController::class, 'show'])->name('occupancy.show');
+        Route::post('occupancy/extend/{id}', [\App\Http\Controllers\Admin\OccupancyController::class, 'extendRental'])->name('occupancy.extend');
+        Route::post('occupancy/terminate/{id}', [\App\Http\Controllers\Admin\OccupancyController::class, 'terminateRental'])->name('occupancy.terminate');
+        
         Route::resource('laporan', LaporanController::class);
     });
     
@@ -98,6 +108,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/booking/detail/{bookingCode}', [BookingController::class, 'detail'])->name('booking.detail');
             Route::post('/booking/cancel/{bookingCode}', [BookingController::class, 'cancel'])->name('booking.cancel');
             Route::post('/booking/confirm/{bookingCode}', [BookingController::class, 'confirm'])->name('booking.confirm');
+            Route::post('/booking/extension/{bookingCode}', [BookingController::class, 'requestExtension'])->name('booking.extension');
         });
     });
 });

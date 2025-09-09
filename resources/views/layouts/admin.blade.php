@@ -69,6 +69,14 @@
                         </svg>
                         Konfirmasi Pembayaran
                     </a>
+                    
+                    <a href="{{ route('admin.occupancy.index') }}" class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 
+                        {{ request()->routeIs('admin.occupancy*') ? 'bg-red-600 text-white shadow-lg border-l-4 border-red-800' : 'text-gray-700 hover:bg-red-50 hover:text-red-600 hover:translate-x-1' }}">
+                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>
+                        </svg>
+                        Monitoring Hunian
+                    </a>
                 </div>
                 
                 <div class="px-4 mt-8">

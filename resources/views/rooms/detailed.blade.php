@@ -456,7 +456,10 @@
                             <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl p-4 text-white">
                                 <div class="flex justify-between items-center">
                                     <span class="text-xl font-bold">Total Pembayaran</span>
-                                    <span class="text-2xl font-black">Rp {{ number_format($kamar->typeKamar->harga, 0, ',', '.') }}</span>
+                                    <span class="text-2xl font-black" id="totalPembayaran">Rp {{ number_format($kamar->typeKamar->harga * 3, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="text-center mt-2 text-red-100 text-sm" id="durasiInfo">
+                                    3 Bulan × Rp {{ number_format($kamar->typeKamar->harga, 0, ',', '.') }}/bulan
                                 </div>
                             </div>
                         </div>
@@ -554,6 +557,54 @@
                         </div>
                     </div>
 
+                    <!-- Rental Duration Section -->
+                    <div class="mb-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-8 h-8 bg-purple-100 rounded-xl flex items-center justify-center mr-3">
+                                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <label class="font-semibold text-gray-700">
+                                Durasi Sewa <span class="text-red-500">*</span>
+                            </label>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3" id="rentalDurationOptions">
+                            <label class="rental-duration-option block cursor-pointer">
+                                <input type="radio" name="rental_duration_months" value="3" class="sr-only">
+                                <div class="p-4 border-2 border-gray-200 rounded-xl text-center hover:border-purple-300 hover:bg-purple-50 transition-all duration-300">
+                                    <div class="font-bold text-lg text-gray-900 mb-1">3 Bulan</div>
+                                    <div class="text-sm text-gray-500">Rp {{ number_format($kamar->typeKamar->harga * 3, 0, ',', '.') }}</div>
+                                    <div class="text-xs text-purple-600 mt-1">Hemat 0%</div>
+                                </div>
+                            </label>
+                            <label class="rental-duration-option block cursor-pointer">
+                                <input type="radio" name="rental_duration_months" value="6" class="sr-only">
+                                <div class="p-4 border-2 border-gray-200 rounded-xl text-center hover:border-purple-300 hover:bg-purple-50 transition-all duration-300">
+                                    <div class="font-bold text-lg text-gray-900 mb-1">6 Bulan</div>
+                                    <div class="text-sm text-gray-500">Rp {{ number_format($kamar->typeKamar->harga * 6, 0, ',', '.') }}</div>
+                                    <div class="text-xs text-purple-600 mt-1">Hemat 5%</div>
+                                </div>
+                            </label>
+                            <label class="rental-duration-option block cursor-pointer">
+                                <input type="radio" name="rental_duration_months" value="9" class="sr-only">
+                                <div class="p-4 border-2 border-gray-200 rounded-xl text-center hover:border-purple-300 hover:bg-purple-50 transition-all duration-300">
+                                    <div class="font-bold text-lg text-gray-900 mb-1">9 Bulan</div>
+                                    <div class="text-sm text-gray-500">Rp {{ number_format($kamar->typeKamar->harga * 9, 0, ',', '.') }}</div>
+                                    <div class="text-xs text-purple-600 mt-1">Hemat 10%</div>
+                                </div>
+                            </label>
+                            <label class="rental-duration-option block cursor-pointer">
+                                <input type="radio" name="rental_duration_months" value="12" class="sr-only">
+                                <div class="p-4 border-2 border-gray-200 rounded-xl text-center hover:border-purple-300 hover:bg-purple-50 transition-all duration-300">
+                                    <div class="font-bold text-lg text-gray-900 mb-1">12 Bulan</div>
+                                    <div class="text-sm text-gray-500">Rp {{ number_format($kamar->typeKamar->harga * 12, 0, ',', '.') }}</div>
+                                    <div class="text-xs text-purple-600 mt-1">Hemat 15%</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- Notes Section -->
                     <div class="mb-8">
                         <div class="flex items-center mb-4">
@@ -574,8 +625,7 @@
                     <!-- Action Buttons -->
                     <div class="space-y-4">
                         <button onclick="processBooking()" id="processBookingBtn"
-                                class="w-full px-8 py-4 bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white rounded-xl hover:from-red-700 hover:via-red-800 hover:to-red-900 font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none flex items-center justify-center"
-                                disabled>
+                                class="w-full px-8 py-4 bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white rounded-xl hover:from-red-700 hover:via-red-800 hover:to-red-900 font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none flex items-center justify-center">
                             <svg class="w-6 h-6 mr-3 opacity-0" id="loadingSpinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a7.646 7.646 0 100 15.292V12"/>
                             </svg>
@@ -859,7 +909,80 @@ function handleBackdropClick(e) {
 // Enhanced Payment method selection with modern UX
 document.addEventListener('DOMContentLoaded', function() {
     const paymentOptions = document.querySelectorAll('.payment-method-option');
+    const rentalOptions = document.querySelectorAll('.rental-duration-option');
     const processBtn = document.getElementById('processBookingBtn');
+    
+    // Base monthly price
+    const monthlyPrice = {{ $kamar->typeKamar->harga }};
+    
+    // Handle rental duration selection
+    rentalOptions.forEach(option => {
+        const radio = option.querySelector('input[type="radio"]');
+        const div = option.querySelector('div');
+        
+        option.addEventListener('click', function() {
+            // Remove selected state from all rental options
+            rentalOptions.forEach(opt => {
+                const optDiv = opt.querySelector('div');
+                optDiv.classList.remove('border-purple-500', 'bg-purple-100', 'ring-2', 'ring-purple-200');
+                optDiv.classList.add('border-gray-200');
+                
+                const optRadio = opt.querySelector('input[type="radio"]');
+                optRadio.checked = false;
+            });
+            
+            // Add selected state to clicked option
+            div.classList.remove('border-gray-200');
+            div.classList.add('border-purple-500', 'bg-purple-100', 'ring-2', 'ring-purple-200');
+            radio.checked = true;
+            
+            // Update total price display
+            const months = parseInt(radio.value);
+            const totalPrice = monthlyPrice * months;
+            
+            document.getElementById('totalPembayaran').textContent = 
+                'Rp ' + totalPrice.toLocaleString('id-ID');
+            document.getElementById('durasiInfo').textContent = 
+                months + ' Bulan × Rp ' + monthlyPrice.toLocaleString('id-ID') + '/bulan';
+                
+            // Check if both payment method and duration are selected
+            checkFormValidity();
+        });
+    });
+    
+    // Set default selection to 3 months - make it more aggressive
+    const initDefaults = () => {
+        // Auto-select 3 months duration
+        const duration3Months = document.querySelector('input[name="rental_duration_months"][value="3"]');
+        if (duration3Months) {
+            duration3Months.checked = true;
+            console.log('✅ Default duration (3 months) selected');
+            
+            // Trigger the click event to ensure UI updates
+            const durationOption = duration3Months.closest('.rental-duration-option');
+            if (durationOption) {
+                const div = durationOption.querySelector('div');
+                div.classList.remove('border-gray-200');
+                div.classList.add('border-purple-500', 'bg-purple-100', 'ring-2', 'ring-purple-200');
+            }
+            
+            // Update total price
+            const monthlyPrice = {{ $kamar->typeKamar->harga }};
+            const totalPrice = monthlyPrice * 3;
+            document.getElementById('totalPembayaran').textContent = 'Rp ' + totalPrice.toLocaleString('id-ID');
+            document.getElementById('durasiInfo').textContent = '3 Bulan × Rp ' + monthlyPrice.toLocaleString('id-ID') + '/bulan';
+        }
+        
+        // Enable button if everything is ready
+        setTimeout(checkFormValidity, 200);
+    };
+    
+    // Run initialization
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDefaults);
+    } else {
+        setTimeout(initDefaults, 100);
+    }
     
     // Countdown timer functionality
     let countdownMinutes = 30;
@@ -967,20 +1090,68 @@ document.addEventListener('DOMContentLoaded', function() {
             radio.checked = true;
             
             // Enable and update process button
-            processBtn.disabled = false;
-            processBtn.classList.add('hover:scale-[1.02]');
-            processBtn.classList.remove('disabled:transform-none');
+            checkFormValidity();
         });
     });
+    
+    // Function to check if both payment method and rental duration are selected
+    function checkFormValidity() {
+        const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
+        const selectedDuration = document.querySelector('input[name="rental_duration_months"]:checked');
+        
+        console.log('Checking form validity:', {
+            selectedPayment: selectedPayment?.value,
+            selectedDuration: selectedDuration?.value,
+            buttonDisabled: processBtn.disabled
+        });
+        
+        const buttonText = document.getElementById('buttonText');
+        
+        if (selectedPayment && selectedDuration) {
+            processBtn.disabled = false;
+            processBtn.classList.remove('opacity-50');
+            processBtn.classList.add('hover:scale-[1.02]');
+            processBtn.classList.remove('disabled:transform-none');
+            buttonText.textContent = 'Konfirmasi & Proses Booking';
+            console.log('✅ Button enabled - ready to book');
+        } else {
+            // Keep button clickable but show warning when clicked
+            processBtn.disabled = false; // Don't disable, let validation handle it
+            processBtn.classList.add('opacity-75');
+            processBtn.classList.remove('hover:scale-[1.02]');
+            
+            const missing = [];
+            if (!selectedPayment) missing.push('metode pembayaran');
+            if (!selectedDuration) missing.push('durasi sewa');
+            
+            buttonText.textContent = `Pilih ${missing.join(' dan ')} dulu`;
+            console.log('⚠️ Button clickable but missing:', missing);
+        }
+    }
 });
 
 function processBooking() {
+    console.log('processBooking function called');
+    
     const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
+    const selectedDuration = document.querySelector('input[name="rental_duration_months"]:checked');
     const notes = document.getElementById('booking_notes').value;
     
+    console.log('Form data:', {
+        payment: selectedPayment?.value,
+        duration: selectedDuration?.value,
+        notes: notes
+    });
+    
     if (!selectedPayment) {
-        // Show modern alert
+        console.log('No payment method selected');
         showModernAlert('Pilih Metode Pembayaran', 'Silakan pilih salah satu metode pembayaran terlebih dahulu.', 'warning');
+        return;
+    }
+    
+    if (!selectedDuration) {
+        console.log('No rental duration selected');
+        showModernAlert('Pilih Durasi Sewa', 'Silakan pilih durasi sewa terlebih dahulu.', 'warning');
         return;
     }
     
@@ -1003,9 +1174,12 @@ function processBooking() {
     const bookingData = {
         kamar_id: {{ $kamar->id }},
         payment_method: selectedPayment.value,
+        rental_duration_months: parseInt(selectedDuration.value),
         notes: notes,
         _token: '{{ csrf_token() }}'
     };
+    
+    console.log('Sending booking request with data:', bookingData);
     
     // Send booking request with timeout
     const controller = new AbortController();
@@ -1022,9 +1196,12 @@ function processBooking() {
     })
     .then(response => {
         clearTimeout(timeoutId);
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
         return response.json();
     })
     .then(data => {
+        console.log('Response data:', data);
         if (data.success) {
             // Show success state
             buttonText.textContent = 'Booking Berhasil!';
