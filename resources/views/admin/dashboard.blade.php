@@ -215,27 +215,6 @@
     <!-- System Info -->
     <div class="space-y-6">
         <div class="bg-white rounded-2xl shadow-lg p-6">
-            <h5 class="text-lg font-bold text-gray-900 mb-4">System Info</h5>
-            <div class="space-y-4">
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-600">Server Status</span>
-                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Online</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-600">Database</span>
-                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Connected</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-600">Storage</span>
-                    <span class="text-gray-900 font-medium">78% Used</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full" style="width: 78%"></div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="bg-white rounded-2xl shadow-lg p-6">
             <h5 class="text-lg font-bold text-gray-900 mb-4">Quick Stats</h5>
             <div class="space-y-3">
                 <div class="flex justify-between items-center">
@@ -250,86 +229,6 @@
                     <span class="text-gray-600">Bulan ini</span>
                     <span class="font-bold text-purple-600">Rp {{ number_format($stats['this_month_revenue'], 0, ',', '.') }}</span>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Recent Activity & Analytics -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <!-- Recent Activity -->
-    <div class="bg-white rounded-2xl shadow-lg p-6">
-        <div class="flex items-center justify-between mb-6">
-            <h4 class="text-xl font-bold text-gray-900">Recent Activity</h4>
-            <button class="text-red-600 hover:text-red-700 font-medium text-sm">
-                View All
-            </button>
-        </div>
-        <div class="space-y-4">
-            @forelse($recentActivities as $activity)
-            <div class="flex items-center p-4 bg-gradient-to-r 
-                @if($activity['color'] === 'green') from-green-50 to-emerald-50 border-l-4 border-green-500
-                @elseif($activity['color'] === 'blue') from-blue-50 to-cyan-50 border-l-4 border-blue-500
-                @elseif($activity['color'] === 'purple') from-purple-50 to-pink-50 border-l-4 border-purple-500
-                @elseif($activity['color'] === 'orange') from-orange-50 to-yellow-50 border-l-4 border-orange-500
-                @endif
-                rounded-xl hover:shadow-md transition-shadow duration-300">
-                <div class="bg-{{ $activity['color'] }}-500 rounded-xl p-3 mr-4">
-                    @if($activity['icon'] === 'user')
-                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
-                    </svg>
-                    @elseif($activity['icon'] === 'home')
-                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-                    </svg>
-                    @elseif($activity['icon'] === 'clipboard')
-                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                    </svg>
-                    @endif
-                </div>
-                <div class="flex-1">
-                    <p class="font-semibold text-gray-900">{{ $activity['title'] }}</p>
-                    <p class="text-sm text-gray-600">{{ $activity['description'] }}</p>
-                    <p class="text-xs text-gray-500 mt-1">{{ $activity['time'] }}</p>
-                </div>
-            </div>
-            @empty
-            <div class="text-center py-8">
-                <p class="text-gray-500">Belum ada aktivitas terbaru</p>
-            </div>
-            @endforelse
-        </div>
-    </div>
-    
-    <!-- Analytics Chart Placeholder -->
-    <div class="bg-white rounded-2xl shadow-lg p-6">
-        <div class="flex items-center justify-between mb-6">
-            <h4 class="text-xl font-bold text-gray-900">Analytics Overview</h4>
-            <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option>Last 30 days</option>
-                <option>Last 7 days</option>
-                <option>Last 90 days</option>
-            </select>
-        </div>
-        
-        <!-- Monthly Data Chart -->
-        <div class="h-64 bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-6">
-            <h4 class="text-lg font-bold text-gray-700 mb-4">Booking & Revenue Trend</h4>
-            <div class="space-y-2 max-h-48 overflow-y-auto">
-                @foreach($monthlyData->take(6) as $data)
-                <div class="flex justify-between items-center py-2 px-3 bg-white bg-opacity-50 rounded-lg">
-                    <span class="text-sm font-medium text-gray-700">{{ $data['month'] }}</span>
-                    <div class="flex space-x-4 text-xs">
-                        <span class="text-blue-600 font-medium">{{ $data['bookings'] }} booking</span>
-                        <span class="text-green-600 font-medium">Rp {{ number_format($data['revenue'], 0, ',', '.') }}</span>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-            <div class="mt-4 text-center">
-                <p class="text-sm text-gray-600 mb-2">Total Bookings: <strong>{{ $stats['total_bookings'] }}</strong> | Total Revenue: <strong>Rp {{ number_format($stats['total_revenue'], 0, ',', '.') }}</strong></p>
             </div>
         </div>
     </div>

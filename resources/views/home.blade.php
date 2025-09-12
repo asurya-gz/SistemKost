@@ -959,19 +959,7 @@
                         <p class="text-gray-600">WCQH+V9C, Pedalangan, Kec. Banyumanik, Kota Semarang, Jawa Tengah 50268</p>
                     </div>
                 </div>
-                
-                <div class="rounded-xl overflow-hidden shadow-lg">
-                    <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d989.8911745181656!2d110.4283901!3d-7.060323!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e708eab6d5aa01b%3A0x829ebf44f9b07845!2sHonest%20Kost!5e0!3m2!1sid!2sid!4v1756022378171!5m2!1sid!2sid" 
-                        width="100%" 
-                        height="450" 
-                        style="border:0;" 
-                        allowfullscreen="" 
-                        loading="lazy" 
-                        referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
-                </div>
-                
+
                 <div class="mt-6 grid md:grid-cols-3 gap-4">
                     <div class="text-center p-4 bg-red-50 rounded-xl">
                         <div class="text-2xl mb-2">🏫</div>
@@ -995,57 +983,40 @@
 </section>
 
 <!-- Kontak Section -->
-<section id="kontak" class="py-20 bg-gray-900 text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl md:text-4xl font-bold mb-4">Hubungi Kami</h2>
-            <p class="text-xl text-gray-300 max-w-3xl mx-auto">
-                Siap untuk menjadi bagian dari Kost Honest? Hubungi kami sekarang untuk informasi lebih lanjut
-            </p>
-        </div>
-        
-        <div class="grid md:grid-cols-2 gap-12">
-            <!-- Contact Info -->
-            <div>
-                <h3 class="text-2xl font-bold mb-8">Informasi Kontak</h3>
-                <div class="space-y-6">
-                    <div class="flex items-center">
-                        <div class="bg-red-600 rounded-full w-12 h-12 flex items-center justify-center text-xl mr-4">
-                            📞
-                        </div>
-                        <div>
-                            <h4 class="font-semibold">Telepon</h4>
-                            <p class="text-gray-300">081325851480</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center">
-                        <div class="bg-red-600 rounded-full w-12 h-12 flex items-center justify-center text-xl mr-4">
-                            📍
-                        </div>
-                        <div>
-                            <h4 class="font-semibold">Alamat</h4>
-                            <p class="text-gray-300">WCQH+V9C, Pedalangan, Kec. Banyumanik,<br>Kota Semarang, Jawa Tengah 50268</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- CTA -->
-            <div class="bg-gradient-to-br from-red-600 to-red-800 rounded-2xl p-8">
-                <h3 class="text-2xl font-bold mb-6">Mulai Pengalaman Kost Terbaik</h3>
-                <p class="text-gray-100 mb-8">
-                    Bergabunglah dengan ratusan penghuni yang telah merasakan kenyamanan tinggal di Kost Honest.
-                </p>
-                <div class="space-y-4">
-                    <a href="{{ route('login') }}" class="block w-full bg-yellow-400 text-gray-900 text-center px-6 py-3 rounded-lg font-bold hover:bg-yellow-500 transition duration-300">
-                        Login Sekarang
-                    </a>
-                    <a href="#" class="block w-full border-2 border-white text-white text-center px-6 py-3 rounded-lg font-bold hover:bg-white hover:text-red-600 transition duration-300">
-                        WhatsApp Kami
-                    </a>
-                </div>
-            </div>
-        </div>
+<section id="kontak" class="py-16 bg-gray-900 text-white">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">Hubungi Kami</h2>
+      <p class="text-lg text-gray-300">
+        Silakan hubungi kami melalui informasi berikut:
+      </p>
     </div>
+
+    <div class="space-y-6">
+      <div class="flex items-center">
+        <div class="bg-red-600 rounded-full w-12 h-12 flex items-center justify-center text-xl mr-4">
+          📞
+        </div>
+        <div>
+          <h4 class="font-semibold">Telepon</h4>
+          <p class="text-gray-300">081325851480</p>
+        </div>
+      </div>
+
+      <div class="flex items-center">
+        <div class="bg-red-600 rounded-full w-12 h-12 flex items-center justify-center text-xl mr-4">
+          📍
+        </div>
+        <div>
+          <h4 class="font-semibold">Alamat</h4>
+          <p class="text-gray-300">
+            WCQH+V9C, Pedalangan, Kec. Banyumanik,<br>
+            Kota Semarang, Jawa Tengah 50268
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
+
 @endsection

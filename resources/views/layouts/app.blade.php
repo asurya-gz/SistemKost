@@ -96,46 +96,7 @@
         @yield('content')
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="grid md:grid-cols-3 gap-8">
-                <!-- Logo & Description -->
-                <div>
-                    <h3 class="text-2xl font-bold text-red-400 mb-4">Kost Honest</h3>
-                    <p class="text-gray-300 mb-4">
-                        Hunian kost yang nyaman, aman, dan terpercaya dengan fasilitas lengkap untuk kehidupan sehari-hari Anda.
-                    </p>
-                </div>
 
-                <!-- Quick Links -->
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#gallery" class="text-gray-300 hover:text-red-400 transition duration-300">Galeri</a></li>
-                        <li><a href="#type-kamar" class="text-gray-300 hover:text-red-400 transition duration-300">Type Kamar</a></li>
-                        <li><a href="#fasilitas" class="text-gray-300 hover:text-red-400 transition duration-300">Fasilitas</a></li>
-                        <li><a href="#tentang" class="text-gray-300 hover:text-red-400 transition duration-300">Tentang Kami</a></li>
-                        <li><a href="#kontak" class="text-gray-300 hover:text-red-400 transition duration-300">Kontak</a></li>
-                        <li><a href="{{ route('login') }}" class="text-gray-300 hover:text-red-400 transition duration-300">Login</a></li>
-                    </ul>
-                </div>
-
-                <!-- Contact Info -->
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Kontak Kami</h4>
-                    <div class="space-y-2 text-gray-300">
-                        <p>📞 081325851480</p>
-                        <p>📍 WCQH+V9C, Pedalangan, Kec. Banyumanik, Kota Semarang, Jawa Tengah 50268</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
-                <p class="text-gray-400">© {{ date('Y') }} Kost Honest. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
 
 
     <script>
